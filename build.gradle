@@ -3,8 +3,11 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.ing.dlt.zkkrypto'
+def groupId = "com.ing.dlt"
+def artifactId = 'zkkrypto'
 version '1.0.1'
+
+group "${groupId}.${artifactId}"
 
 repositories {
     mavenCentral()
@@ -27,6 +30,16 @@ compileTestKotlin {
 }
 
 publishing {
+
+    publications {
+        maven(MavenPublication) {
+            groupId = "${groupId}"
+            artifactId = "${artifactId}"
+            version = "$version"
+
+            from components.java
+        }
+    }
 
     repositories {
         maven {
