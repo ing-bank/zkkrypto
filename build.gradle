@@ -3,13 +3,6 @@ plugins {
     id 'maven-publish'
 }
 
-Properties secrets = new Properties()
-File secretsFile = file("$projectDir/local.properties")
-if (secretsFile.exists()) {
-    secretsFile.withInputStream { secrets.load(it) }
-}
-
-
 group = "com.ing.dlt"
 def artifactId = 'zkkrypto'
 version '1.0.0'
@@ -51,8 +44,8 @@ publishing {
             name = "GitHubPackages"
             url = "https://maven.pkg.github.com/ing-bank/zkkrypto"
             credentials {
-                username = secrets.getProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
-                password = secrets.getProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }
