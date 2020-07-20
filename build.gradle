@@ -4,7 +4,11 @@ plugins {
 }
 
 Properties secrets = new Properties()
-file("$projectDir/local.properties").withInputStream { secrets.load(it) }
+File secretsFile = file("$projectDir/local.properties")
+if (secretsFile.exists()) {
+    secretsFile.withInputStream { secrets.load(it) }
+}
+
 
 group = "com.ing.dlt"
 def artifactId = 'zkkrypto'
