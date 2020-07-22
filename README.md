@@ -7,6 +7,30 @@ Currently, following algorithms are implemented:
 - Pedersen hash
 - JubJub curve arithmetics
 
+### Getting started
+
+To use zkkrypto as Gradle dependency add Github's repo to use 'repositories' list.
+
+```
+repositories {
+    ...
+    maven {
+        name = "GitHubPackages"
+        url = "https://maven.pkg.github.com/ing-bank/zkkrypto"
+    }
+    ...
+}
+```
+Then you can use zkkrypto package in your dependencies:
+```
+dependencies {
+    ...
+    implementation "com.ing.dlt:zkkrypto:{VERSION}"
+    ...
+}
+```
+Done! Now import chosen primitives and knock yourself out.
+
 ### Work in progress
 
 We are going to support this repo and to add new algorithms to it. So if you are interested in particular primitives - let us know. Push requests are highly appreciated as well.
