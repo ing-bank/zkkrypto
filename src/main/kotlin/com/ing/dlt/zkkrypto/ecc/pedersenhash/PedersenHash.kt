@@ -27,7 +27,10 @@ data class PedersenHash(val window: Int = 3, val generators: List<EllipticCurveP
 
     private val curve: EllipticCurve = generators.first().curve
 
-    private val hashByteLength = curve.S.toByteArray().size
+    /**
+     * Hash size in bytes
+     */
+    val hashLength = curve.S.toByteArray().size
 
     fun hash(msg: ByteArray, salt: ByteArray? = null): ByteArray = hash(BitArray(msg), if(salt != null) BitArray(salt) else null)
 
@@ -47,10 +50,10 @@ data class PedersenHash(val window: Int = 3, val generators: List<EllipticCurveP
 
         // we want constant size hashes so we add trailing zero bytes to the beginning
         val bytes = hashPoint.x.toByteArray()
-        return if(bytes.size == hashByteLength)
+        return if(bytes.size == hashLength)
             bytes
         else
-            ByteArray(hashByteLength - bytes.size).plus(bytes)
+            ByteArray(hashLength - bytes.size).plus(bytes)
     }
 
     // compute enc(m_j) as in the documentation
