@@ -14,9 +14,7 @@ To use zkkrypto as Gradle dependency add Bintray Jcenter to the 'repositories' l
 ```
 repositories {
     ...
-    maven {  
-        url "https://dl.bintray.com/alexeykoren/zkkrypto"
-    }
+    jcenter()
     ...
 }
 ```
