@@ -9,15 +9,12 @@ Currently, following algorithms are implemented:
 
 ### Getting started
 
-To use zkkrypto as Gradle dependency add Github's repo to use 'repositories' list.
+To use zkkrypto as Gradle dependency add Bintray Jcenter to the 'repositories' list.
 
 ```
 repositories {
     ...
-    maven {
-        name = "GitHubPackages"
-        url = "https://maven.pkg.github.com/ing-bank/zkkrypto"
-    }
+    jcenter()
     ...
 }
 ```
