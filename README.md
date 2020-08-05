@@ -5,7 +5,8 @@ This repository contains cryptographic primitives mostly used in a ZKP context. 
 Currently, following algorithms are implemented:
 
 - Pedersen hash
-- JubJub curve arithmetics
+- Edwards curve arithmetics
+- Curves: Jubjub, BabyJubjub, AltBabyJubjub
 
 ### Getting started
 

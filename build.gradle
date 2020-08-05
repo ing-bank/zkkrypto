@@ -5,7 +5,7 @@ plugins {
 
 group = "com.ing.dlt"
 def artifactId = 'zkkrypto'
-version '1.0.0'
+version '1.0.1'
 
 repositories {
     mavenCentral()

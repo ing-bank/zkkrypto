@@ -1,10 +1,9 @@
-package com.ing.dlt.zkkrypto.ecc.jubjub
+package com.ing.dlt.zkkrypto.ecc
 
-import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
 import java.lang.IllegalStateException
 import java.math.BigInteger
 
-data class JubJubPoint(override val x: BigInteger, override val y: BigInteger, override val curve: JubJub = JubJub.default) :
+data class EdwardsPoint(override val x: BigInteger, override val y: BigInteger, override val curve: EllipticCurve) :
     EllipticCurvePoint {
 
     init {
@@ -32,7 +31,7 @@ data class JubJubPoint(override val x: BigInteger, override val y: BigInteger, o
         val resultX = xNom.multiply(xDenomInversed).mod(curve.R)
         val resultY = yNom.multiply(yDenomInversed).mod(curve.R)
 
-        return JubJubPoint(resultX, resultY, curve)
+        return EdwardsPoint(resultX, resultY, curve)
     }
 
     override fun scalarMult(scalar: BigInteger): EllipticCurvePoint {

@@ -4,7 +4,7 @@ import java.math.BigInteger
 
 interface EllipticCurve {
 
-    // filed size
+    // group order
     val R: BigInteger
 
     // order of prime subgroup

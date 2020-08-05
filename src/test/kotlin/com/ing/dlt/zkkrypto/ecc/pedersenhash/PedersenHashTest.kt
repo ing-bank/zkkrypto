@@ -1,20 +1,32 @@
 package com.ing.dlt.zkkrypto.ecc.pedersenhash
 
+import com.ing.dlt.zkkrypto.ecc.curves.Jubjub
 import com.ing.dlt.zkkrypto.util.BitArray
+import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import java.math.BigInteger
 import kotlin.random.Random
 
 internal class PedersenHashTest {
 
     @Test
-    fun hash() {
+    fun jubjub() {
 
-        TestVectors.vectors.forEach { vector ->
+        TestVectors.jubjub.forEach { vector ->
 
-            val hash  = BigInteger(PedersenHash().hash(vector.input_bits))
+            val hash  = BigInteger(PedersenHash.zcash().hash(vector.input_bits))
+
+            assertEquals(BigInteger(vector.hash_x, 16), hash)
+        }
+    }
+
+    @Test
+    fun altBabyJubjub() {
+
+        TestVectors.altBabyJubjub.forEach { vector ->
+
+            val hash  = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
 
             assertEquals(BigInteger(vector.hash_x, 16), hash)
         }
@@ -29,7 +41,7 @@ internal class PedersenHashTest {
 //        so we check it was correctly padded with zero byte at zero position to be 32-bytes constant size
 
         val m = 48058
-        val hash = PedersenHash().hash(BitArray(m.toBigInteger().toByteArray()))
+        val hash = PedersenHash.zcash().hash(BitArray(m.toBigInteger().toByteArray()))
         assertEquals(hash[0], 0)
         assertEquals(32, hash.size)
         assertEquals("4dfcf879a397d2e531f57282a5ef770953210f4e5030bc0d4526cf47fa2d00", BigInteger(hash).toString(16))
@@ -41,12 +53,12 @@ internal class PedersenHashTest {
 
         val full = Random.Default.nextBytes(ByteArray(10))
 
-        val expected = PedersenHash().hash(full)
+        val expected = PedersenHash.zcash().hash(full)
 
         val msg = full.drop(4).toByteArray()
         val salt = full.dropLast(full.size - 4).toByteArray()
 
-        val hash = PedersenHash().hash(msg, salt)
+        val hash = PedersenHash(curve = Jubjub).hash(msg, salt)
 
         assertArrayEquals(expected, hash)
     }
@@ -55,9 +67,9 @@ internal class PedersenHashTest {
     //    @Test
     fun hashSingle() {
 
-        val vector = TestVectors.vectors[0]
+        val vector = TestVectors.jubjub[0]
 
-        val hash = BigInteger(PedersenHash().hash(vector.input_bits))
+        val hash = BigInteger(PedersenHash(curve = Jubjub).hash(vector.input_bits))
 
         println("Message hash is: ${hash.toString(16)}")
 
@@ -98,7 +110,7 @@ internal class PedersenHashTest {
         val start = System.nanoTime()
         val numRuns = 1000
         for(m in 1..numRuns) {
-            PedersenHash().hash(BitArray(m.toBigInteger().toByteArray()))
+            PedersenHash(curve = Jubjub).hash(BitArray(m.toBigInteger().toByteArray()))
         }
         val finish = System.nanoTime()
         println("Total time (nanos): ${finish - start}")
