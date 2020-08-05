@@ -2,6 +2,8 @@ package com.ing.dlt.zkkrypto.ecc.pedersenhash
 
 import com.ing.dlt.zkkrypto.ecc.EllipticCurve
 import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
+import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
+import com.ing.dlt.zkkrypto.ecc.curves.Jubjub
 import com.ing.dlt.zkkrypto.util.BitArray
 import java.lang.IllegalStateException
 import java.math.BigInteger
@@ -11,7 +13,12 @@ import kotlin.math.min
  * Instance of Pedersen Hash.
  * Window size is dynamic by design but in practice it is only tested and works for classic 3-bits window
  */
-data class PedersenHash(val window: Int = 3, val generators: List<EllipticCurvePoint> = GeneratorsGenerator.default) {
+data class PedersenHash(
+    val window: Int = 3,
+    val chunksPerGenerator: Int = 63, // ZCash default, Zinc uses 62 for AltJJ
+    val curve: EllipticCurve,
+    val generators: List<EllipticCurvePoint> = GeneratorsGenerator.defaultForCurve(curve)
+) {
 
     init {
         generators.forEach {
@@ -23,9 +30,7 @@ data class PedersenHash(val window: Int = 3, val generators: List<EllipticCurveP
 
     private val chunkShift = window + 1
 
-    private val chunksPerGenerator = 63 // ZCash default
-
-    private val curve: EllipticCurve = generators.first().curve
+    private
 
     /**
      * Hash size in bytes
@@ -126,4 +131,9 @@ data class PedersenHash(val window: Int = 3, val generators: List<EllipticCurveP
         return m.withPadding((window - m.size % window) % window)
     }
 
+    companion object {
+        fun zinc() = PedersenHash(curve = AltBabyJubjub, chunksPerGenerator = 62)
+        fun zcash() = PedersenHash(curve = Jubjub, chunksPerGenerator = 63)
+    }
 }
+

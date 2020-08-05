@@ -6,7 +6,7 @@ object TestVectors {
 
     //! Test vectors from https://github.com/zcash-hackworks/zcash-test-vectors/blob/master/sapling_pedersen.py
 
-    val vectors = listOf(
+    val jubjub = listOf(
         
         TestVector (
             personalization = Personalization.NoteCommitment,
@@ -705,7 +705,22 @@ object TestVectors {
         )
     )
 
+    // Test from Zinc, input is 42 + NoteCommitment
+
+    val altBabyJubjub = listOf(
+
+        TestVector (
+            personalization = Personalization.NoteCommitment,
+            input_bits = BitArray.fromString("11111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101010"),
+            hash_x = "d799568a2faaebce79310bbb84e454bf934e61f1879c8095ac7c0a45905d2d3",
+            hash_y = "40d2992106b2c6e8c2f0b38e5238fbd9b46ef042d91011a5566044f2943ac65"
+        )
+    )
+
     data class TestVector(
+        /**
+         * we store personalization info just in case although it is already joined into 'input_bits'
+         */
         val personalization: String,
         val input_bits: BitArray,
         val hash_x: String,
@@ -713,6 +728,7 @@ object TestVectors {
     )
 
     object Personalization {
+        const val NONE = ""
         const val NoteCommitment = "111111"
         const val MerkleTree_0 = ""
         const val MerkleTree_34 = ""
