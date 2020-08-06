@@ -30,8 +30,6 @@ data class PedersenHash(
 
     private val chunkShift = window + 1
 
-    private
-
     /**
      * Hash size in bytes
      */
