@@ -17,7 +17,8 @@ data class PedersenHash(
     val window: Int = 3,
     val chunksPerGenerator: Int = 63, // ZCash default, Zinc uses 62 for AltJJ
     val curve: EllipticCurve,
-    val generators: List<EllipticCurvePoint> = GeneratorsGenerator.defaultForCurve(curve)
+    val generators: List<EllipticCurvePoint> = GeneratorsGenerator.defaultForCurve(curve),
+    val defaultSalt: BitArray? = null
 ) {
 
     init {
@@ -35,9 +36,9 @@ data class PedersenHash(
      */
     val hashLength = curve.S.toByteArray().size
 
-    fun hash(msg: ByteArray, salt: ByteArray? = null): ByteArray = hash(BitArray(msg), if(salt != null) BitArray(salt) else null)
+    fun hash(msg: ByteArray, salt: BitArray? = null): ByteArray = hash(BitArray(msg), salt)
 
-    fun hash(msg: BitArray, salt: BitArray? = null): ByteArray {
+    fun hash(msg: BitArray, salt: BitArray? = defaultSalt): ByteArray {
 
         var hashPoint = curve.zero
         val salted = salted(msg, salt)
@@ -130,7 +131,12 @@ data class PedersenHash(
     }
 
     companion object {
-        fun zinc() = PedersenHash(curve = AltBabyJubjub, chunksPerGenerator = 62)
+        fun zinc() = PedersenHash(
+            curve = AltBabyJubjub,
+            chunksPerGenerator = 62,
+            defaultSalt = BitArray.fromString("111111")
+        )
+
         fun zcash() = PedersenHash(curve = Jubjub, chunksPerGenerator = 63)
     }
 }

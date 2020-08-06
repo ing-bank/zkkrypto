@@ -1,12 +1,11 @@
 package com.ing.dlt.zkkrypto.util
 
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 import java.math.BigInteger
+import kotlin.experimental.or
 
 /**
  * Bit array with underlying bit[] representation
- * Bir order:
+ * Bit order:
  * zero (2^0) bit of data[0] is a first bit of the sequence;
  * last (2^7) bit of data[data.size-1] is the last bit of sequence (unless size != data.size * 8)
  */
@@ -48,10 +47,30 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
     }
 
     fun plus(other: BitArray): BitArray {
-        // To do: implement arbitrary length if we need such
-        if(size % 8 != 0) throw IllegalStateException("Length should be multiple of 8")
+        return if(size % 8 != 0) {
+            val newData = shift(other.data, this.size)
+            for (i in this.data.indices) newData[i] = newData[i] or data[i]
+            BitArray(newData, this.size + other.size)
+        } else {
+            BitArray(data.plus(other.data), this.size + other.size)
+        }
+    }
 
-        return BitArray(data.plus(other.data), size + other.size)
+    private fun shift(source: ByteArray, bitCount: Int): ByteArray {
+        val shiftMod = bitCount % 8
+        val offsetBytes = bitCount / 8
+        val dest = ByteArray(source.size + offsetBytes + (if(shiftMod == 0) 0 else 1))
+
+        for (i in source.indices) {
+            if(shiftMod == 0) {
+                dest[offsetBytes + i] = source[i]
+            } else {
+                val sourceCarry = (source[i].toInt() ushr (8 - shiftMod)).toByte()
+                dest[offsetBytes + i] = dest[offsetBytes + i] or (source[i].toInt() shl shiftMod).toByte()
+                dest[offsetBytes + i + 1] = dest[offsetBytes + i + 1] or sourceCarry
+            }
+        }
+        return dest
     }
 
     companion object {

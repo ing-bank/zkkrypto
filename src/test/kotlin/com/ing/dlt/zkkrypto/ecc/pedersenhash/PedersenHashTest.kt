@@ -1,11 +1,13 @@
 package com.ing.dlt.zkkrypto.ecc.pedersenhash
 
+import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
 import com.ing.dlt.zkkrypto.ecc.curves.Jubjub
 import com.ing.dlt.zkkrypto.util.BitArray
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
+import java.nio.ByteBuffer
 import kotlin.random.Random
 
 internal class PedersenHashTest {
@@ -22,16 +24,42 @@ internal class PedersenHashTest {
     }
 
     @Test
-    fun altBabyJubjub() {
+    fun altBabyJubjubStrings() {
 
         TestVectors.altBabyJubjub.forEach { vector ->
 
-            val hash  = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
+            val hash = BigInteger(PedersenHash(curve = AltBabyJubjub, chunksPerGenerator = 62)
+                .hash(vector.input_bits))
 
             assertEquals(BigInteger(vector.hash_x, 16), hash)
         }
     }
 
+    @Test
+    fun altBabyJubjubBytes() {
+
+        TestVectors.altBabyJubjubBytes.forEach { vector ->
+
+            val hash = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
+
+            assertEquals(vector.hash_x,  hash.toString(16))
+        }
+    }
+
+    @Test
+    fun zincDefaultTest() {
+
+        val vector = TestVectors.TestVector(
+            personalization = TestVectors.Personalization.NoteCommitment,
+            input_bits = BitArray.fromString("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101010"),
+            hash_x = "d799568a2faaebce79310bbb84e454bf934e61f1879c8095ac7c0a45905d2d3",
+            hash_y = "40d2992106b2c6e8c2f0b38e5238fbd9b46ef042d91011a5566044f2943ac65"
+        )
+
+        val hash  = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
+
+        assertEquals(BigInteger(vector.hash_x, 16), hash)
+    }
 
     @Test
     fun constantSizeHash() {
@@ -58,7 +86,7 @@ internal class PedersenHashTest {
         val msg = full.drop(4).toByteArray()
         val salt = full.dropLast(full.size - 4).toByteArray()
 
-        val hash = PedersenHash(curve = Jubjub).hash(msg, salt)
+        val hash = PedersenHash(curve = Jubjub).hash(msg, BitArray(salt))
 
         assertArrayEquals(expected, hash)
     }
