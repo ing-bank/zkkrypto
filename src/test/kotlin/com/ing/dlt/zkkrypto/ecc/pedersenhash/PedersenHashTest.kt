@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
-import java.nio.ByteBuffer
 import kotlin.random.Random
 
 internal class PedersenHashTest {
@@ -58,21 +57,21 @@ internal class PedersenHashTest {
 
         val hash  = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
 
-        assertEquals(BigInteger(vector.hash_x, 16), hash)
+        assertEquals(vector.hash_x, hash.toString(16))
     }
 
     @Test
     fun constantSizeHash() {
 
-//        PH(48058) = 004dfcf879a397d2e531f57282a5ef770953210f4e5030bc0d4526cf47fa2d00
+//        PH(40) = 00116fbd117d117768ec0f977d857df3e278015d4ce9fd4d08bd6c153ebd1fa2
 //        48058 hashes to the point where X coordinate is only 31 byte long
 //        so we check it was correctly padded with zero byte at zero position to be 32-bytes constant size
 
-        val m = 48058
+        val m = 40
         val hash = PedersenHash.zcash().hash(BitArray(m.toBigInteger().toByteArray()))
-        assertEquals(hash[0], 0)
+        assertEquals(0, hash[0])
         assertEquals(32, hash.size)
-        assertEquals("4dfcf879a397d2e531f57282a5ef770953210f4e5030bc0d4526cf47fa2d00", BigInteger(hash).toString(16))
+        assertEquals("116fbd117d117768ec0f977d857df3e278015d4ce9fd4d08bd6c153ebd1fa2", BigInteger(hash).toString(16))
     }
 
 

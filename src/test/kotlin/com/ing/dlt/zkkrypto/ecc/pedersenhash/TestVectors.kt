@@ -723,49 +723,49 @@ object TestVectors {
 
         TestVector (
             personalization = Personalization.NoteCommitment,
-            input_bits = BitArray(arrayOf(2).map { it.toJavaByte() }.toByteArray()),
+            input_bits = BitArray(arrayOf(2).map { it.toByte() }.toByteArray()),
             hash_x = "16eaafa8bf93f1f27186cb8771b852a9a3570830eb263c0c39523ab90674e6",
             hash_y = "b235463d147fc1042a120bdff0a35668ad1d9b8c265c48976086d8807abdfb6"
         ),
 
         TestVector (
             personalization = Personalization.NoteCommitment,
-            input_bits = BitArray(arrayOf(2, 2).map { it.toJavaByte() }.toByteArray()),
+            input_bits = BitArray(arrayOf(2, 2).map { it.toByte() }.toByteArray()),
             hash_x = "6273578ac58d3c2f79f2e1c295a5ed3a74a16f1e35661c7bc6592813201835d",
             hash_y = "187681a9397880994ca3584285e4dc7e9d0aa6fa42e0ff08b1dcb17dc8f3900e"
         ),
 
         TestVector (
             personalization = Personalization.NoteCommitment,
-            input_bits = BitArray(arrayOf(0, 0, 0, 2).map { it.toJavaByte() }.toByteArray()),
+            input_bits = BitArray(arrayOf(0, 0, 0, 2).map { it.toByte() }.toByteArray()),
             hash_x = "1ceb95bf288ae7358b559348b56fd36abf9326af4ffe64e2d2b6210c445344b0",
             hash_y = "159c5863b7f2ad2e3df3c3798625bf2c4a6f7046ea6053a856774e0502de7b2"
         ),
 
         TestVector (
             personalization = Personalization.NoteCommitment,
-            input_bits = BitArray(arrayOf(2,  2,  2,  2,  2,  2,  2,  2).map { it.toJavaByte() }.toByteArray()),
+            input_bits = BitArray(arrayOf(2,  2,  2,  2,  2,  2,  2,  2).map { it.toByte() }.toByteArray()),
             hash_x = "12a71044d9154787840999c1654d30f1a19422c09897c1511c67068b4f1ec557",
             hash_y = "6f45fb86387cbf7342be80e0b924420fb42d44c73781d1d07075bb8d9d5fbf9"
         ),
 
         TestVector (
             personalization = Personalization.NoteCommitment,
-            input_bits = BitArray(arrayOf(2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2).map { it.toJavaByte() }.toByteArray()),
+            input_bits = BitArray(arrayOf(2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2).map { it.toByte() }.toByteArray()),
             hash_x = "1651027d8491db883b96a377b0cc885673415f012c2a5b92d3b146e369843257",
             hash_y = "16b09c34ed5232f658e4c38400bd7b6d0cb9396e10488d4a219d96914e2b438a"
         ),
 
         TestVector (
             personalization = Personalization.NoteCommitment,
-            input_bits = BitArray(arrayOf(2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2).map { it.toJavaByte() }.toByteArray()),
+            input_bits = BitArray(arrayOf(2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2).map { it.toByte() }.toByteArray()),
             hash_x = "104058a28c52d2db3ddb540f03d2c0c798244daee3df59067a101f7679a69d9a",
             hash_y = "2d6c50a6937223a1f3dd7f90394809356e574f5158f9f6044a5bb4ea3aec81a8"
         ),
 
         TestVector (
             personalization = Personalization.NoteCommitment,
-            input_bits = BitArray(arrayOf(2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2).map { it.toJavaByte() }.toByteArray()),
+            input_bits = BitArray(arrayOf(2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2).map { it.toByte() }.toByteArray()),
             hash_x = "1b483fbf06bf1a7f139ebed40ede666708616fadad90ab99a1475ab4dea7227",
             hash_y = "27a8660e4da972407d3156e2fd06de6ae0226459de30da24473e72b079ec836e"
         )
@@ -789,16 +789,4 @@ object TestVectors {
         const val MerkleTree_36 = ""
         const val MerkleTree_27 = ""
     }
-}
-
-/**
- * Converts Zinc byte to Java byte by flipping bits
- */
-private fun Int.toJavaByte(): Byte {
-    var res = 0
-    for (shift in 0..7) {
-        val bit = if((this and (1 shl shift)) == 0) 0 else 1
-        res = res or (bit shl (7 - shift))
-    }
-    return res.toByte()
 }
