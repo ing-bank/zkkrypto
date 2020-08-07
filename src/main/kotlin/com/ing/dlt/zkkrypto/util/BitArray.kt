@@ -1,13 +1,10 @@
 package com.ing.dlt.zkkrypto.util
 
 import java.math.BigInteger
-import kotlin.experimental.and
-import kotlin.experimental.or
 
 /**
  * Bit array with underlying byte[] representation in big-endian bit order
  */
-@ExperimentalUnsignedTypes
 data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
 
     fun get(i: Int): BigInteger {
@@ -47,7 +44,7 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
 
     fun plus(other: BitArray): BitArray {
         return if(size % 8 != 0) {
-            val newData = shift(other.data.toUByteArray(), this.size)
+            val newData = shift(other.data, this.size)
             for (i in this.data.indices) newData[i] = newData[i] or data[i]
             BitArray(newData, this.size + other.size)
         } else {
@@ -55,18 +52,18 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
         }
     }
 
-    private fun shift(source: UByteArray, bitCount: Int): ByteArray {
+    private fun shift(source: ByteArray, bitCount: Int): ByteArray {
         val shiftMod = bitCount % 8
         val offsetBytes = bitCount / 8
         val dest = ByteArray(source.size + offsetBytes + (if(shiftMod == 0) 0 else 1))
-        val carryMask = (0xFF ushr (8 - shiftMod)).toUByte()
+        val carryMask = (0xFF ushr (8 - shiftMod)).toByte()
 
         for (i in source.indices) {
             if(shiftMod == 0) {
-                dest[offsetBytes + i] = source[i].toByte()
+                dest[offsetBytes + i] = source[i]
             } else {
-                val sourceCarry = (source[i] and carryMask).toInt() shl (8 - shiftMod)
-                dest[offsetBytes + i] = dest[offsetBytes + i] or (source[i].toInt() ushr shiftMod).toByte()
+                val sourceCarry = (source[i] and carryMask).asUnsigned() shl (8 - shiftMod)
+                dest[offsetBytes + i] = dest[offsetBytes + i] or (source[i].asUnsigned() ushr shiftMod).toByte()
                 dest[offsetBytes + i + 1] = dest[offsetBytes + i + 1] or sourceCarry.toByte()
             }
         }
