@@ -36,7 +36,7 @@ data class PedersenHash(
      */
     val hashLength = curve.S.toByteArray().size
 
-    fun hash(msg: ByteArray, salt: BitArray? = null): ByteArray = hash(BitArray(msg), salt)
+    fun hash(msg: ByteArray, salt: BitArray? = defaultSalt): ByteArray = hash(BitArray(msg), salt)
 
     fun hash(msg: BitArray, salt: BitArray? = defaultSalt): ByteArray {
 
