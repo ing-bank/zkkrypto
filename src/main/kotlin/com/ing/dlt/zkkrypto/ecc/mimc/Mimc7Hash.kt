@@ -63,18 +63,27 @@ data class Mimc7Hash(
 
         fun generateRoundConstants(seed: ByteArray = defaultSeed, numRounds: Int = defaultNumRounds, r: BigInteger): List<BigInteger> {
 
-            val constants = mutableListOf<BigInteger>()
+            val constants = mutableListOf<BigInteger>(BigInteger.ZERO)
 
             val keccak: Keccak.Digest256 = Keccak.Digest256()
             val digest = keccak.digest(seed)
 
-            var c = BigInteger(digest)
+            var c = BigInteger(1, digest)
 
             for (i in 0 until numRounds) {
-                c = BigInteger(keccak.digest(c.toByteArray()))
+                val bytes = dropSignBitIfNeeded(c.toByteArray())
+                c = BigInteger(1, keccak.digest(bytes))
                 constants.add(c % r)
             }
             return constants
+        }
+
+        private fun dropSignBitIfNeeded(bytes: ByteArray): ByteArray {
+            return if (bytes[0] == 0.toByte()) {
+                val res = ByteArray(bytes.size - 1)
+                System.arraycopy(bytes, 1, res, 0, res.size)
+                res
+            } else bytes
         }
     }
 }
