@@ -1,4 +1,4 @@
-package com.ing.dlt.zkkrypto.ecc
+package com.ing.dlt.zkkrypto.ecc.mimc
 
 import com.ing.dlt.zkkrypto.ecc.mimc.Mimc7Hash
 import org.bouncycastle.jcajce.provider.digest.Keccak
