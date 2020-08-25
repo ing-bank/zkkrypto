@@ -2,6 +2,7 @@ package com.ing.dlt.zkkrypto.ecc.mimc
 
 import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.math.BigInteger
+import kotlin.math.min
 
 
 data class Mimc7Hash(
@@ -21,7 +22,7 @@ data class Mimc7Hash(
 
         // check if all elements are in field R
         msg.forEach {
-            if( it <= r) throw IllegalArgumentException("Element $it is not in field $r")
+            if( it > r) throw IllegalArgumentException("Element $it is not in field $r")
         }
 
         var result = BigInteger.ZERO
@@ -38,7 +39,7 @@ data class Mimc7Hash(
 
     private fun hashElement(msg: BigInteger, key: BigInteger): BigInteger {
         var res: BigInteger = BigInteger.ZERO
-        for (i in 0..numRounds) {
+        for (i in 0 until numRounds) {
             val t = if (i == 0) {
                 msg + key
             } else {
@@ -53,7 +54,17 @@ data class Mimc7Hash(
     }
 
     private fun bytesToField(msg: ByteArray): List<BigInteger> {
-        TODO("Not yet implemented")
+
+        // 31 seems to hardcoded and probably should depend on R but I use it like this for compatibility reason
+        val n = 31
+        val ints = mutableListOf<BigInteger>()
+
+        for (i in msg.indices step n) {
+            // We revert array here because bytes are supposed to be little-endian unlike BigInteger
+            val int = BigInteger(1, msg.sliceArray(i until min(i+n, msg.size)).reversedArray())
+            ints.add(int)
+        }
+        return ints
     }
 
     companion object {
