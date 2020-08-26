@@ -6,7 +6,7 @@ Currently, following algorithms are implemented:
 
 - Pedersen hash
 - MiMC7 hash
-- Edwards curve arithmetics
+- Edwards curve arithmetic
 - Curves: Jubjub, BabyJubjub, AltBabyJubjub
 
 ### Getting started
