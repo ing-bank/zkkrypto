@@ -5,7 +5,7 @@ import com.ing.dlt.zkkrypto.ecc.curves.EdwardsCurve
 import java.lang.IllegalArgumentException
 import java.math.BigInteger
 
-object EdwardsForm : Arithmetics {
+object EdwardsForm : Arithmetic {
 
     override fun add(a: EllipticCurvePoint, b: EllipticCurvePoint): EllipticCurvePoint {
 

@@ -1,9 +1,9 @@
 package com.ing.dlt.zkkrypto.ecc
 
-import com.ing.dlt.zkkrypto.ecc.arithmetics.Arithmetics
+import com.ing.dlt.zkkrypto.ecc.arithmetics.Arithmetic
 import java.math.BigInteger
 
-interface EllipticCurve : Arithmetics {
+interface EllipticCurve : Arithmetic {
 
     // group order
     val R: BigInteger
