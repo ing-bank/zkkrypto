@@ -1,6 +1,6 @@
 package com.ing.dlt.zkkrypto.ecc
 
-import com.ing.dlt.zkkrypto.ecc.arithmetics.Arithmetic
+import com.ing.dlt.zkkrypto.ecc.arithmetic.Arithmetic
 import java.math.BigInteger
 
 interface EllipticCurve : Arithmetic {
