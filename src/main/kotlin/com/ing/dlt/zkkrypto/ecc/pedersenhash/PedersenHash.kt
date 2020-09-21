@@ -2,6 +2,7 @@ package com.ing.dlt.zkkrypto.ecc.pedersenhash
 
 import com.ing.dlt.zkkrypto.ecc.EllipticCurve
 import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
+import com.ing.dlt.zkkrypto.ecc.ZKHash
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
 import com.ing.dlt.zkkrypto.ecc.curves.Jubjub
 import com.ing.dlt.zkkrypto.util.BitArray
@@ -19,7 +20,7 @@ data class PedersenHash(
     val curve: EllipticCurve,
     val generators: List<EllipticCurvePoint> = GeneratorsGenerator.defaultForCurve(curve),
     val defaultSalt: BitArray? = null
-) {
+): ZKHash {
 
     init {
         generators.forEach {
@@ -34,7 +35,9 @@ data class PedersenHash(
     /**
      * Hash size in bytes
      */
-    val hashLength = curve.S.toByteArray().size
+    override val hashLength = curve.S.toByteArray().size
+
+    override fun hash(msg: ByteArray): ByteArray = hash(msg, salt = null)
 
     fun hash(msg: ByteArray, salt: BitArray? = defaultSalt): ByteArray = hash(BitArray(msg), salt)
 
