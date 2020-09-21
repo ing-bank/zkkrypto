@@ -1,6 +1,6 @@
 package com.ing.dlt.zkkrypto.ecc.curves
 
-import com.ing.dlt.zkkrypto.ecc.arithmetics.EdwardsForm
+import com.ing.dlt.zkkrypto.ecc.arithmetic.EdwardsForm
 import com.ing.dlt.zkkrypto.ecc.EllipticCurve
 import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
 import java.math.BigInteger

@@ -1,11 +1,12 @@
 # ZKKrypto
 
-This repository contains cryptographic primitives mostly used in a ZKP context. The goal is to gather a collection of ZKP-related crypto algorithms written in Kotlin in a single place to simplify research and development.
+This repository contains cryptographic primitives mostly used in a ZKP context. The goal is to gather a collection of ZKP-related crypto algorithms written in Kotlin (accessible in Java) in a single place to simplify research and development.
 
 Currently, following algorithms are implemented:
 
 - Pedersen hash
 - MiMC7 hash
+- Poseidon hash
 - Edwards curve arithmetic
 - Curves: Jubjub, BabyJubjub, AltBabyJubjub
 

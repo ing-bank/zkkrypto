@@ -1,4 +1,4 @@
-package com.ing.dlt.zkkrypto.ecc.arithmetics
+package com.ing.dlt.zkkrypto.ecc.arithmetic
 
 import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
 import com.ing.dlt.zkkrypto.ecc.curves.EdwardsCurve

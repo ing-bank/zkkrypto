@@ -1,12 +1,13 @@
 package com.ing.dlt.zkkrypto.ecc.mimc
 
+import com.ing.dlt.zkkrypto.ecc.curves.BabyJubjub
 import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.math.BigInteger
 import kotlin.math.min
 
 
 data class Mimc7Hash(
-    val r: BigInteger,
+    val r: BigInteger = BabyJubjub.R,
     val numRounds: Int = defaultNumRounds,
     val roundConstants: List<BigInteger> = generateRoundConstants(r = r, numRounds = numRounds)
 ) {
