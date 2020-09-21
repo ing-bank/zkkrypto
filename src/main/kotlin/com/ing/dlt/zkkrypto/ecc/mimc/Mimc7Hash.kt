@@ -1,5 +1,6 @@
 package com.ing.dlt.zkkrypto.ecc.mimc
 
+import com.ing.dlt.zkkrypto.ecc.ZKHash
 import com.ing.dlt.zkkrypto.ecc.curves.BabyJubjub
 import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.math.BigInteger
@@ -10,14 +11,14 @@ data class Mimc7Hash(
     val r: BigInteger = BabyJubjub.R,
     val numRounds: Int = defaultNumRounds,
     val roundConstants: List<BigInteger> = generateRoundConstants(r = r, numRounds = numRounds)
-) {
+): ZKHash {
 
     /**
      * Hash size in bytes
      */
-    val hashLength = r.bitLength() / 8 + if(r.bitLength() / 8 != 0) 1 else 0
+    override val hashLength = r.bitLength() / 8 + if(r.bitLength() / 8 != 0) 1 else 0
 
-    fun hash(msg: ByteArray): ByteArray = hash(bytesToField(msg))
+    override fun hash(msg: ByteArray): ByteArray = hash(bytesToField(msg))
 
     fun hash(msg: List<BigInteger>): ByteArray {
 
@@ -44,7 +45,7 @@ data class Mimc7Hash(
             val t = if (i == 0) {
                 msg + key
             } else {
-                res + key + roundConstants[i];
+                res + key + roundConstants[i]
             }
 
             val t2 = t * t
