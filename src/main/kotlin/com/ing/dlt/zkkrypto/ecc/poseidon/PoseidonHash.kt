@@ -1,11 +1,11 @@
 package com.ing.dlt.zkkrypto.ecc.poseidon
 
+import com.ing.dlt.zkkrypto.ecc.curves.BabyJubjub
 import com.ing.dlt.zkkrypto.ecc.poseidon.Constants.Companion.defaultRoundConstants
 import java.math.BigInteger
-import kotlin.math.min
 
 data class PoseidonHash(
-    val r: BigInteger,
+    val r: BigInteger = BabyJubjub.R,
     val constants: Constants = defaultRoundConstants()
 ) {
 
@@ -14,23 +14,7 @@ data class PoseidonHash(
      */
     val hashLength = r.bitLength() / 8 + if(r.bitLength() / 8 != 0) 1 else 0
 
- //   fun hash(msg: ByteArray): ByteArray = hash(bytesToField(msg))
-
-    private fun sbox(m: BigInteger): BigInteger {
-        return m.modPow(BigInteger.valueOf(5), r)
-    }
-
-    fun mix(state: List<BigInteger>, matrix: List<List<BigInteger>>): List<BigInteger> {
-
-        val newState: MutableList<BigInteger> = MutableList(state.size) { BigInteger.ZERO }
-
-        for (i in state.indices) {
-            for (j in state.indices) {
-                newState[i] = newState[i] + matrix[j][i] * state[j]
-            }
-        }
-        return newState
-    }
+ //   TODO fun hash(msg: ByteArray): ByteArray = hash(bytesToField(msg))
 
     fun hash(msg: List<BigInteger>): BigInteger  {
 
@@ -45,7 +29,7 @@ data class PoseidonHash(
 
         val lastRound = constants.numRoundsF + nRoundsP - 1
 
-        for (round in 0..constants.numRoundsF + nRoundsP) {
+        for (round in 0 until constants.numRoundsF + nRoundsP) {
 
             // Add Round Key
             for (i in state.indices) {
@@ -72,17 +56,19 @@ data class PoseidonHash(
         return state[0]
     }
 
-    private fun bytesToField(msg: ByteArray): List<BigInteger> {
+    private fun sbox(m: BigInteger): BigInteger {
+        return m.modPow(BigInteger.valueOf(5), r)
+    }
 
-        // 31 seems to hardcoded and probably should depend on R but I use it like this for compatibility reason
-        val n = 31
-        val ints = mutableListOf<BigInteger>()
+    private fun mix(state: List<BigInteger>, matrix: List<List<BigInteger>>): List<BigInteger> {
 
-        for (i in msg.indices step n) {
-            // We revert array here because bytes are supposed to be little-endian unlike BigInteger
-            val int = BigInteger(1, msg.sliceArray(i until min(i+n, msg.size)).reversedArray())
-            ints.add(int)
+        val newState: MutableList<BigInteger> = MutableList(state.size) { BigInteger.ZERO }
+
+        for (i in state.indices) {
+            for (j in state.indices) {
+                newState[i] = newState[i] + matrix[j][i] * state[j]
+            }
         }
-        return ints
+        return newState
     }
 }

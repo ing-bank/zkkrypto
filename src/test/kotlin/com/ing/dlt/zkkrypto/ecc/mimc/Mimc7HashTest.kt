@@ -44,7 +44,7 @@ class Mimc7HashTest {
         val b78 = BigInteger("78", 10)
         val b41 = BigInteger("41", 10)
 
-        val mimc7 = Mimc7Hash(BigInteger("21888242871839275222246405745257275088548364400416034343698204186575808495617", 10))
+        val mimc7 = Mimc7Hash()
         
         val ints1 = listOf(b12)
         val h1 = mimc7.hash(ints1)
@@ -80,7 +80,7 @@ class Mimc7HashTest {
 
         val msg = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
-        val mimc7 = Mimc7Hash(BigInteger("21888242871839275222246405745257275088548364400416034343698204186575808495617", 10))
+        val mimc7 = Mimc7Hash()
 
         val h = mimc7.hash(msg.toByteArray())
         assertEquals(
