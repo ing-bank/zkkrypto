@@ -81,7 +81,7 @@ class SchnorrSignatureTest {
         assert(verified)
     }
 
-    @Test
+    //@Test
     fun benchmarkRawMessage() {
         val numRuns = 1000
         val schnorr = SchnorrSignature.zinc()
@@ -130,7 +130,7 @@ class SchnorrSignatureTest {
 
     }
 
-    @Test
+    //@Test
     fun benchmarkSignedMessage() {
         val numRuns = 1000
         val schnorr = SchnorrSignature.zinc()
