@@ -11,7 +11,7 @@ version '1.0.8'
 
 repositories {
     mavenCentral()
-    maven { url "https://dl.bintray.com/ethereum/maven/"}
+    maven { url "https://dl.bintray.com/ethereum/maven/" }
 }
 
 dependencies {
@@ -21,9 +21,16 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags("benchmark")
+    }
 }
 
+task benchmark(type: Test) {
+    useJUnitPlatform {
+        includeTags("benchmark")
+    }
+}
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }

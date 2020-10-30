@@ -2,6 +2,7 @@ package com.ing.dlt.zkkrypto.ecc.schnorr
 
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import kotlin.system.measureNanoTime
@@ -63,8 +64,8 @@ class SchnorrSignatureTest {
         }
     }
 
-    @Disabled
     @Test
+    @Tag("benchmark")
     fun benchmarkRawMessage() {
         val numRuns = 1000
         val schnorr = SchnorrSignature.zinc
@@ -106,8 +107,8 @@ class SchnorrSignatureTest {
         println("Average time per operation (nanos): ${verifyTimeElapsed / numRuns}\n\n")
     }
 
-    @Disabled
     @Test
+    @Tag("benchmark")
     fun benchmarkSignedMessage() {
         val numRuns = 1000
         val schnorr = SchnorrSignature.zinc
