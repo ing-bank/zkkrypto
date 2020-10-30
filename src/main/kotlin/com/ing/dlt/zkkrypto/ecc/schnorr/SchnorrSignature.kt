@@ -2,35 +2,33 @@ package com.ing.dlt.zkkrypto.ecc.schnorr
 
 import com.ing.dlt.zkkrypto.ecc.EllipticCurve
 import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
+import com.ing.dlt.zkkrypto.ecc.HashEnum
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
 import com.ing.dlt.zkkrypto.ecc.schnorr.FixedGenerators.altBabyJubjubFixedGenerators
 import com.ing.dlt.zkkrypto.util.asUnsigned
 import org.bouncycastle.crypto.digests.Blake2bDigest
 import org.bouncycastle.crypto.digests.Blake2sDigest
+import java.lang.IllegalArgumentException
 import java.math.BigInteger
 import java.security.SecureRandom
 import kotlin.random.Random.Default.nextBytes
-
-enum class Hash{
-    BLAKE2S,
-    BLAKE2B
-}
 
 /**
  * Implementation of Schnorr signatures
  * This implementation uses AltBabyJubJub curve and Blake2 hash
  */
 
-class SchnorrSignature (
+class SchnorrSignature(
     val curve: EllipticCurve,
     val base: EllipticCurvePoint,
     val compPersonalization: ByteArray,
-    val msgPersonalization: ByteArray) {
+    val msgPersonalization: ByteArray
+) {
 
     companion object {
-        fun zinc() = SchnorrSignature(
+        val zinc = SchnorrSignature(
             curve = AltBabyJubjub,
-            base = altBabyJubjubFixedGenerators()[5],
+            base = altBabyJubjubFixedGenerators[5],
             compPersonalization = "Zcash_RedJubjubH".toByteArray(),
             msgPersonalization = "Matter_H".toByteArray()
         )
@@ -40,63 +38,71 @@ class SchnorrSignature (
         const val BLAKE2S_DIGEST_LENGTH = 32
     }
 
-    private lateinit var privateKey: BigInteger
-    lateinit var publicKey: EllipticCurvePoint
-
-    fun generatePrivateKey() {
+    private var privateKey: BigInteger
+    var publicKey: EllipticCurvePoint
+    init {
+        // Generate private key
         privateKey = BigInteger(curve.S.bitLength(), SecureRandom())
         while (privateKey > curve.S) {
             privateKey = BigInteger(curve.S.bitLength(), SecureRandom())
         }
-    }
-
-    fun getPublicKeyFromPrivate(){
+        // Compute public key
         publicKey = base.scalarMult(privateKey)
     }
 
-    fun signRawMessage(msgBytes: ByteArray) : Signature {
+    fun nextKeyPair() {
+        // Generate private key
+        privateKey = BigInteger(curve.S.bitLength(), SecureRandom())
+        while (privateKey > curve.S) {
+            privateKey = BigInteger(curve.S.bitLength(), SecureRandom())
+        }
+        // Compute public key
+        publicKey = base.scalarMult(privateKey)
+    }
 
-        //Get random bytes
-        val t = nextBytes(80)
+    fun signRawMessage(msgBytes: ByteArray): Signature {
 
-        //Generate random r as the hash digest of Blake2b(t || msg)
-        val r = hashToScalar(Hash.BLAKE2B, compPersonalization, first = t, second = msgBytes)
+        // Generate random r as the hash digest of Blake2b(randomBytes || msg)
+        val r = hashToScalar(HashEnum.BLAKE2B, compPersonalization, first = nextBytes(80), second = msgBytes)
 
-        //compute first component of the signature
+        // compute first component of the signature
         val rPoint = base.scalarMult(r)
 
-        //pad message
+        // pad message
+        check(MAX_MESSAGE_SIZE - msgBytes.size >= 0) { "Message size should not be greater than MAX_MESSAGE_SIZE" }
         val paddedMessage = msgBytes + ByteArray(MAX_MESSAGE_SIZE - msgBytes.size)
         val uniformMessage = toUniformFieldElement(paddedMessage)
 
-        //second component of the signature
-        val s = uniformMessage.multiply(privateKey).mod(curve.S).add(r).mod(curve.S)
+        // second component of the signature
+        val s = uniformMessage * privateKey % curve.S + r % curve.S
 
         return Signature(rPoint, s)
     }
 
-    fun signHashedMessage(msgBytes: ByteArray) : Signature {
+    fun signHashedMessage(msgBytes: ByteArray): Signature {
 
-        val t = nextBytes(80)
-        val r = hashToScalar(Hash.BLAKE2B, compPersonalization, first = t, second = msgBytes)
+        // Generate random r as the hash digest of Blake2b(randomBytes || msg)
+        val r = hashToScalar(HashEnum.BLAKE2B, compPersonalization, first = nextBytes(80), second = msgBytes)
 
-        //compute first component of the signature
+        // compute first component of the signature
         val rPoint = base.scalarMult(r)
 
-        //hash r_x || message
+        // hash r_x || message
         val rXCoordBytes = rPoint.x.toByteArray().reversedArray()
+        check(MAX_MESSAGE_SIZE - msgBytes.size >= 0) { "Message size should not be greater than MAX_MESSAGE_SIZE" }
         val paddedMessage = msgBytes + ByteArray(MAX_MESSAGE_SIZE - msgBytes.size)
 
-        val messageDigest = hashToScalar(Hash.BLAKE2S, msgPersonalization, first = rXCoordBytes, second = paddedMessage)
+        val messageDigest = hashToScalar(HashEnum.BLAKE2S, msgPersonalization, first = rXCoordBytes, second = paddedMessage)
 
-        //second component of the signature
-        val s = messageDigest.multiply(privateKey).mod(curve.S).add(r).mod(curve.S)
+        // second component of the signature
+        val s = messageDigest * privateKey % curve.S + r % curve.S
 
         return Signature(rPoint, s)
     }
 
-    fun verifyRawMessage(msgBytes: ByteArray, signature: Signature) : Boolean {
-        //pad message to max message size and convert to a field element
+    fun verifyRawMessage(msgBytes: ByteArray, signature: Signature): Boolean {
+        // pad message to max message size and convert to a field element
+        check(MAX_MESSAGE_SIZE - msgBytes.size >= 0) { "Message size should not be greater than MAX_MESSAGE_SIZE" }
         val paddedMessage = msgBytes + ByteArray(MAX_MESSAGE_SIZE - msgBytes.size)
         val uniformMessage = toUniformFieldElement(paddedMessage)
 
@@ -107,14 +113,16 @@ class SchnorrSignature (
         return rhs == baseMultS
     }
 
-    fun verifyHashedMessage(msgBytes: ByteArray, signature: Signature) : Boolean {
-        //hash r_x || message
+    fun verifyHashedMessage(msgBytes: ByteArray, signature: Signature): Boolean {
+        // hash r_x || message
         val rXCoordBytes = signature.r.x.toByteArray().reversedArray()
+        
+        check(MAX_MESSAGE_SIZE - msgBytes.size >= 0) { "Message size should not be greater than MAX_MESSAGE_SIZE" }
         val paddedMessage = msgBytes + ByteArray(MAX_MESSAGE_SIZE - msgBytes.size)
 
-        val messageDigest = hashToScalar(Hash.BLAKE2S, msgPersonalization, first = rXCoordBytes, second = paddedMessage)
+        val messageDigest = hashToScalar(HashEnum.BLAKE2S, msgPersonalization, first = rXCoordBytes, second = paddedMessage)
 
-        //verification
+        // verification
         val baseMultS = base.scalarMult(signature.s)
         val pkMultMsg = publicKey.scalarMult(messageDigest)
         val rhs = pkMultMsg.add(signature.r)
@@ -122,11 +130,13 @@ class SchnorrSignature (
         return rhs == baseMultS
     }
 
-    private fun hashToScalar(hashFunction: Hash, personalization: ByteArray, first: ByteArray, second:ByteArray) : BigInteger {
+    private fun hashToScalar(hashFunction: HashEnum, personalization: ByteArray, first: ByteArray, second: ByteArray): BigInteger {
         val digest = when (hashFunction) {
-            Hash.BLAKE2B -> hashBlake2b(first + second, personalization);
-            Hash.BLAKE2S -> hashBlake2s(first.plus(second), personalization)
+            HashEnum.BLAKE2B -> hashBlake2b(first + second, personalization)
+            HashEnum.BLAKE2S -> hashBlake2s(first + second, personalization)
+            else -> throw IllegalArgumentException("Unsupported function type")
         }
+
         return toUniformFieldElement(digest)
     }
 
@@ -157,6 +167,4 @@ class SchnorrSignature (
         blake2s.doFinal(hash, 0)
         return hash
     }
-
 }
-
