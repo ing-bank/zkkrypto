@@ -1,7 +1,6 @@
 package com.ing.dlt.zkkrypto.ecc.schnorr
 
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
