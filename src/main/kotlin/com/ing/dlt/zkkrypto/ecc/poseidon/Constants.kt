@@ -16,8 +16,8 @@ data class Constants(
 
         fun defaultRoundConstants(): Constants {
             return Constants(
-                defaultCStrings.map { it.map {  BigInteger(it, 10) }},
-                defaultMStrings.map { it.map {  it.map { BigInteger(it, 10) }}} ,
+                defaultCStrings.map { it.map { BigInteger(it, 10) } },
+                defaultMStrings.map { it.map { it.map { BigInteger(it, 10) } } },
                 defaultNumRoundsF,
                 defaultNumRoundsP
             )

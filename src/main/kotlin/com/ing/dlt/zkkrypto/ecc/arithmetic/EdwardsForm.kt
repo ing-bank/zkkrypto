@@ -12,7 +12,7 @@ object EdwardsForm : Arithmetic {
 //        x = (pointA.x * pointB.y + pointA.y * pointB.x) / (1 + d * pointA.x * pointB.x * pointA.y * pointB.y)
 //        y = (pointA.y * pointB.y + pointA.x * pointB.x) / (1 - d * pointA.x * pointB.x * pointA.y * pointB.y)
 
-        if(a.curve != b.curve) throw IllegalArgumentException("Points should be on the same curve, A's curve is ${a.curve}, B's curve is ${b.curve}")
+        if (a.curve != b.curve) throw IllegalArgumentException("Points should be on the same curve, A's curve is ${a.curve}, B's curve is ${b.curve}")
 
         val curve = a.curve as EdwardsCurve
 
@@ -43,7 +43,7 @@ object EdwardsForm : Arithmetic {
         var doubling: EllipticCurvePoint = p.copy()
         var result: EllipticCurvePoint = p.curve.zero
 
-        for( i in 0 until s.bitLength() ) {
+        for (i in 0 until s.bitLength()) {
             if (s.testBit(i)) {
                 result = result.add(doubling)
             }
@@ -69,5 +69,4 @@ object EdwardsForm : Arithmetic {
 
         return y2.subtract(x2).mod(p.curve.R) == BigInteger.ONE.add(dTimesX2Y2).mod(p.curve.R)
     }
-
 }

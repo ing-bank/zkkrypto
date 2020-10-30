@@ -11,5 +11,4 @@ object BabyJubjub : EdwardsCurve {
     override val cofactor: BigInteger = BigInteger.valueOf(8)
 
     override val zero: EllipticCurvePoint = EllipticCurvePoint(BigInteger.ZERO, BigInteger.ONE, this)
-
 }

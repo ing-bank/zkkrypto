@@ -1,8 +1,8 @@
 package com.ing.dlt.zkkrypto.ecc.curves
 
-import com.ing.dlt.zkkrypto.ecc.arithmetic.EdwardsForm
 import com.ing.dlt.zkkrypto.ecc.EllipticCurve
 import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
+import com.ing.dlt.zkkrypto.ecc.arithmetic.EdwardsForm
 import java.math.BigInteger
 
 /**
@@ -19,5 +19,5 @@ interface EdwardsCurve : EllipticCurve {
 
     override fun double(p: EllipticCurvePoint): EllipticCurvePoint = EdwardsForm.double(p)
 
-    override fun isOnCurve(p: EllipticCurvePoint): Boolean  = EdwardsForm.isOnCurve(p)
+    override fun isOnCurve(p: EllipticCurvePoint): Boolean = EdwardsForm.isOnCurve(p)
 }

@@ -116,7 +116,7 @@ class SchnorrSignature(
     fun verifyHashedMessage(msgBytes: ByteArray, signature: Signature): Boolean {
         // hash r_x || message
         val rXCoordBytes = signature.r.x.toByteArray().reversedArray()
-        
+
         check(MAX_MESSAGE_SIZE - msgBytes.size >= 0) { "Message size should not be greater than MAX_MESSAGE_SIZE" }
         val paddedMessage = msgBytes + ByteArray(MAX_MESSAGE_SIZE - msgBytes.size)
 

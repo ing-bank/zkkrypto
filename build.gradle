@@ -3,6 +3,7 @@ plugins {
     id "com.jfrog.bintray" version "1.8.5"
     id "maven-publish"
     id 'java-library'
+    id 'com.diffplug.gradle.spotless' version '3.28.1'
 }
 
 group = "com.ing.dlt"
@@ -10,7 +11,7 @@ version '1.0.8'
 
 repositories {
     mavenCentral()
-    maven { url "https://dl.bintray.com/ethereum/maven/" }
+    maven { url "https://dl.bintray.com/ethereum/maven/"}
 }
 
 dependencies {
@@ -35,6 +36,11 @@ java {
     withJavadocJar()
 }
 
+spotless {
+    kotlin {
+        ktlint("0.37.1")
+    }
+}
 
 // Bintray publishing
 bintray {
