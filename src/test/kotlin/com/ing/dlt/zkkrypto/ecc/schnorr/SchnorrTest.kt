@@ -1,180 +1,151 @@
 package com.ing.dlt.zkkrypto.ecc.schnorr
 
-import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
-import com.ing.dlt.zkkrypto.ecc.curves.Jubjub
-import com.ing.dlt.zkkrypto.ecc.pedersenhash.PedersenHash
-import com.ing.dlt.zkkrypto.util.BitArray
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
-
+import kotlin.system.measureNanoTime
 
 class SchnorrSignatureTest {
 
     @Test
-    fun `test raw message signing`(){
+    fun `test raw message signing`() {
 
-        val schnorr = SchnorrSignature.zinc()
+        listOf(ByteArray(1) { 85 }, "Foo bar pad to16".toByteArray()).forEach {
+            val schnorr = SchnorrSignature.zinc
 
-        schnorr.generatePrivateKey()
-        schnorr.getPublicKeyFromPrivate()
+            println("\nPublic Key:")
+            println("\tx coord = " + schnorr.publicKey.x.toString(16))
+            println("\ty coord = " + schnorr.publicKey.y.toString(16) + "\n")
 
-        println("Public Key:")
-        println("\tx coord = " + schnorr.publicKey.x.toString(16))
-        println("\ty coord = " + schnorr.publicKey.y.toString(16) + "\n")
+            val signature = schnorr.signRawMessage(it)
 
-        val msg = 85.toByte()
-        val msgBytes = byteArrayOf(msg)
+            println("Signature:")
+            println("\tR:")
+            println("\t\tx coord = " + signature.r.x.toString(16))
+            println("\t\ty coord = " + signature.r.y.toString(16))
+            println("\ts:")
+            println("\t\tvalue = " + signature.s.toString(16))
 
-        //val msg = "Foo bar pad to16"
-        //val msgBytes = msg.toByteArray()
+            val verified = schnorr.verifyRawMessage(it, signature)
 
-        val signature = schnorr.signRawMessage(msgBytes);
+            if (verified)
+                println("\nSignature verified!")
 
-        println("Signature:")
-        println("\tR:")
-        println("\t\tx coord = " + signature.r.x.toString(16))
-        println("\t\ty coord = " + signature.r.y.toString(16))
-        println("\ts:")
-        println("\t\tvalue = " + signature.s.toString(16))
-
-
-        val verified = schnorr.verifyRawMessage(msgBytes, signature)
-
-        if (verified)
-            println("\nSignature verified!")
-
-        assert(verified)
+            assert(verified)
+        }
     }
 
     @Test
-    fun `test hashed message signing`(){
+    fun `test hashed message signing`() {
 
-        val schnorr = SchnorrSignature.zinc()
+        listOf(ByteArray(1) { 85 }, "Foo bar pad to16".toByteArray()).forEach {
+            val schnorr = SchnorrSignature.zinc
 
-        schnorr.generatePrivateKey()
-        schnorr.getPublicKeyFromPrivate()
+            println("Public Key:")
+            println("\tx coord = " + schnorr.publicKey.x.toString(16))
+            println("\ty coord = " + schnorr.publicKey.y.toString(16) + "\n")
 
-        println("Public Key:")
-        println("\tx coord = " + schnorr.publicKey.x.toString(16))
-        println("\ty coord = " + schnorr.publicKey.y.toString(16) + "\n")
+            val signature = schnorr.signHashedMessage(it)
+            val verified = schnorr.verifyHashedMessage(it, signature)
 
-        val msg = 85.toByte()
-        val msgBytes = byteArrayOf(msg)
+            println("Signature:")
+            println("\tR:")
+            println("\t\tx coord = " + signature.r.x.toString(16))
+            println("\t\ty coord = " + signature.r.y.toString(16))
+            println("\ts:")
+            println("\t\tvalue = " + signature.s.toString(16))
 
-        //val msg = "Foo bar pad to16"
-        //val msgBytes = msg.toByteArray()
+            if (verified)
+                println("Signature verified!")
 
-        val signature = schnorr.signHashedMessage(msgBytes);
-        val verified = schnorr.verifyHashedMessage(msgBytes, signature)
-
-        println("Signature:")
-        println("\tR:")
-        println("\t\tx coord = " + signature.r.x.toString(16))
-        println("\t\ty coord = " + signature.r.y.toString(16))
-        println("\ts:")
-        println("\t\tvalue = " + signature.s.toString(16))
-
-        if (verified)
-            println("Signature verified!")
-
-        assert(verified)
+            assert(verified)
+        }
     }
 
-    //@Test
+    @Disabled
+    @Test
     fun benchmarkRawMessage() {
         val numRuns = 1000
-        val schnorr = SchnorrSignature.zinc()
+        val schnorr = SchnorrSignature.zinc
 
-        var startKeyGen:Long = 0
-        var finishKeyGen:Long = 0
+        var keyGenTimeElapsed: Long = 0
+        var signTimeElapsed: Long = 0
+        var verifyTimeElapsed: Long = 0
 
-        var startSign:Long = 0
-        var finishSign:Long = 0
+        for (m in 1..numRuns) {
 
-        var startVerify:Long = 0
-        var finishVerify:Long = 0
+            // measure KeyGen
+            keyGenTimeElapsed += measureNanoTime {
+                schnorr.nextKeyPair()
+            }
 
-        for(m in 1..numRuns) {
+            // measure sign
+            var signature = Signature(AltBabyJubjub.zero, BigInteger.ZERO)
 
-            //measure KeyGen
-            startKeyGen += System.nanoTime()
+            signTimeElapsed += measureNanoTime {
+                signature = schnorr.signRawMessage(byteArrayOf(m.toByte()))
+            }
 
-            schnorr.generatePrivateKey()
-            schnorr.getPublicKeyFromPrivate()
-
-            finishKeyGen += System.nanoTime()
-
-            //measure sign raw message
-            startSign += System.nanoTime()
-            val signature = schnorr.signRawMessage(byteArrayOf(m.toByte()))
-            finishSign += System.nanoTime()
-
-            //measure verify
-            startVerify += System.nanoTime()
-            schnorr.verifyRawMessage(byteArrayOf(m.toByte()), signature)
-            finishVerify += System.nanoTime()
+            // measure verify
+            verifyTimeElapsed += measureNanoTime {
+                schnorr.verifyRawMessage(byteArrayOf(m.toByte()), signature)
+            }
         }
 
         println("Key generation:")
-        println("Total time (nanos): ${finishKeyGen - startKeyGen}")
-        println("Average time per operation (nanos): ${(finishKeyGen - startKeyGen) / numRuns}\n\n")
+        println("Total time (nanos): $keyGenTimeElapsed")
+        println("Average time per operation (nanos): ${keyGenTimeElapsed / numRuns}\n\n")
 
         println("Sign Raw Message:")
-        println("Total time (nanos): ${finishSign - startSign}")
-        println("Average time per operation (nanos): ${(finishSign - startSign) / numRuns}\n\n")
+        println("Total time (nanos): $signTimeElapsed")
+        println("Average time per operation (nanos): ${signTimeElapsed / numRuns}\n\n")
 
         println("Verify Raw Message:")
-        println("Total time (nanos): ${finishVerify - startVerify}")
-        println("Average time per operation (nanos): ${(finishVerify - startVerify) / numRuns}\n\n")
-
+        println("Total time (nanos): $verifyTimeElapsed")
+        println("Average time per operation (nanos): ${verifyTimeElapsed / numRuns}\n\n")
     }
 
-    //@Test
+    @Disabled
+    @Test
     fun benchmarkSignedMessage() {
         val numRuns = 1000
-        val schnorr = SchnorrSignature.zinc()
+        val schnorr = SchnorrSignature.zinc
 
-        var startKeyGen:Long = 0
-        var finishKeyGen:Long = 0
+        var keyGenTimeElapsed: Long = 0
+        var signTimeElapsed: Long = 0
+        var verifyTimeElapsed: Long = 0
 
-        var startSign:Long = 0
-        var finishSign:Long = 0
+        for (m in 1..numRuns) {
 
-        var startVerify:Long = 0
-        var finishVerify:Long = 0
+            // measure KeyGen
+            keyGenTimeElapsed += measureNanoTime {
+                schnorr.nextKeyPair()
+            }
 
-        for(m in 1..numRuns) {
+            // measure sign
+            var signature = Signature(AltBabyJubjub.zero, BigInteger.ZERO)
 
-            //measure KeyGen
-            startKeyGen += System.nanoTime()
+            signTimeElapsed += measureNanoTime {
+                signature = schnorr.signHashedMessage(byteArrayOf(m.toByte()))
+            }
 
-            schnorr.generatePrivateKey()
-            schnorr.getPublicKeyFromPrivate()
-
-            finishKeyGen += System.nanoTime()
-
-            //measure sign raw message
-            startSign += System.nanoTime()
-            val signature = schnorr.signHashedMessage(byteArrayOf(m.toByte()))
-            finishSign += System.nanoTime()
-
-            //measure verify
-            startVerify += System.nanoTime()
-            schnorr.verifyHashedMessage(byteArrayOf(m.toByte()), signature)
-            finishVerify += System.nanoTime()
+            // measure verify
+            verifyTimeElapsed += measureNanoTime {
+                schnorr.verifyHashedMessage(byteArrayOf(m.toByte()), signature)
+            }
         }
 
         println("Key generation:")
-        println("Total time (nanos): ${finishKeyGen - startKeyGen}")
-        println("Average time per operation (nanos): ${(finishKeyGen - startKeyGen) / numRuns}\n\n")
+        println("Total time (nanos): $keyGenTimeElapsed")
+        println("Average time per operation (nanos): ${keyGenTimeElapsed / numRuns}\n\n")
 
         println("Sign Hashed Message:")
-        println("Total time (nanos): ${finishSign - startSign}")
-        println("Average time per operation (nanos): ${(finishSign - startSign) / numRuns}\n\n")
+        println("Total time (nanos): $signTimeElapsed")
+        println("Average time per operation (nanos): ${signTimeElapsed / numRuns}\n\n")
 
         println("Verify Hashed Message:")
-        println("Total time (nanos): ${finishVerify - startVerify}")
-        println("Average time per operation (nanos): ${(finishVerify - startVerify) / numRuns}\n\n")
+        println("Total time (nanos): $verifyTimeElapsed")
+        println("Average time per operation (nanos): ${verifyTimeElapsed / numRuns}\n\n")
     }
 }
