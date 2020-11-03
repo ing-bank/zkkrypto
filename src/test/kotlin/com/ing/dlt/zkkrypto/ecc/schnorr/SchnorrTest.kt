@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
-import kotlin.random.Random
 import kotlin.random.Random.Default.nextBytes
 import kotlin.system.measureNanoTime
 
@@ -76,7 +75,8 @@ class SchnorrSignatureTest {
             schnorr.setKeys(BigInteger(vector.privateKey, 16))
             val signature = schnorr.signRawMessage(
                 msgBytes = vector.message.toByteArray(),
-                seed = vector.seed.split(",").map { it.toInt().toByte() }.toByteArray())
+                seed = vector.seed.split(",").map { it.toInt().toByte() }.toByteArray()
+            )
 
             assertEquals(BigInteger(vector.signatureRX, 16), signature.r.x)
             assertEquals(BigInteger(vector.signatureRY, 16), signature.r.y)
@@ -97,7 +97,8 @@ class SchnorrSignatureTest {
             schnorr.setKeys(BigInteger(vector.privateKey, 16))
             val signature = schnorr.signHashedMessage(
                 msgBytes = vector.message.toByteArray(),
-                seed = vector.seed.split(",").map { it.toInt().toByte() }.toByteArray())
+                seed = vector.seed.split(",").map { it.toInt().toByte() }.toByteArray()
+            )
 
             assertEquals(BigInteger(vector.signatureRX, 16), signature.r.x)
             assertEquals(BigInteger(vector.signatureRY, 16), signature.r.y)

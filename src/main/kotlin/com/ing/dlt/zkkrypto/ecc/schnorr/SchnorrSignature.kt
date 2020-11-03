@@ -11,7 +11,6 @@ import org.bouncycastle.crypto.digests.Blake2sDigest
 import java.lang.IllegalArgumentException
 import java.math.BigInteger
 import java.security.SecureRandom
-import kotlin.random.Random.Default.nextBytes
 
 /**
  * Implementation of Schnorr signatures
@@ -50,7 +49,7 @@ class SchnorrSignature(
         publicKey = base.scalarMult(privateKey)
     }
 
-    fun setKeys(privKey: BigInteger){
+    fun setKeys(privKey: BigInteger) {
         privateKey = privKey
         publicKey = base.scalarMult(privateKey)
     }
