@@ -1,15 +1,18 @@
 package com.ing.dlt.zkkrypto.ecc.schnorr
 
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
+import kotlin.random.Random
+import kotlin.random.Random.Default.nextBytes
 import kotlin.system.measureNanoTime
 
 class SchnorrSignatureTest {
 
     @Test
-    fun `test raw message signing`() {
+    fun `test raw message signing from Zinc`() {
 
         listOf(ByteArray(1) { 85 }, "Foo bar pad to16".toByteArray()).forEach {
             val schnorr = SchnorrSignature.zinc
@@ -18,7 +21,7 @@ class SchnorrSignatureTest {
             println("\tx coord = " + schnorr.publicKey.x.toString(16))
             println("\ty coord = " + schnorr.publicKey.y.toString(16) + "\n")
 
-            val signature = schnorr.signRawMessage(it)
+            val signature = schnorr.signRawMessage(msgBytes = it, seed = nextBytes(80))
 
             println("Signature:")
             println("\tR:")
@@ -37,7 +40,7 @@ class SchnorrSignatureTest {
     }
 
     @Test
-    fun `test hashed message signing`() {
+    fun `test hashed message signing from Zinc`() {
 
         listOf(ByteArray(1) { 85 }, "Foo bar pad to16".toByteArray()).forEach {
             val schnorr = SchnorrSignature.zinc
@@ -46,7 +49,7 @@ class SchnorrSignatureTest {
             println("\tx coord = " + schnorr.publicKey.x.toString(16))
             println("\ty coord = " + schnorr.publicKey.y.toString(16) + "\n")
 
-            val signature = schnorr.signHashedMessage(it)
+            val signature = schnorr.signHashedMessage(msgBytes = it, seed = nextBytes(80))
             val verified = schnorr.verifyHashedMessage(it, signature)
 
             println("Signature:")
@@ -60,6 +63,48 @@ class SchnorrSignatureTest {
                 println("Signature verified!")
 
             assert(verified)
+        }
+    }
+
+    @Test
+    fun testVectorsPlainMessage() {
+
+        val schnorr = SchnorrSignature.zinc
+
+        TestVectors.testVectorsPlainMessage.forEach { vector ->
+
+            schnorr.setKeys(BigInteger(vector.privateKey, 16))
+            val signature = schnorr.signRawMessage(
+                msgBytes = vector.message.toByteArray(),
+                seed = vector.seed.split(",").map { it.toInt().toByte() }.toByteArray())
+
+            assertEquals(BigInteger(vector.signatureRX, 16), signature.r.x)
+            assertEquals(BigInteger(vector.signatureRY, 16), signature.r.y)
+
+            assertEquals(BigInteger(vector.signatureS, 16), signature.s)
+
+            println("Validated!")
+        }
+    }
+
+    @Test
+    fun testVectorsHashedMessage() {
+
+        val schnorr = SchnorrSignature.zinc
+
+        TestVectors.testVectorsHashedMessage.forEach { vector ->
+
+            schnorr.setKeys(BigInteger(vector.privateKey, 16))
+            val signature = schnorr.signHashedMessage(
+                msgBytes = vector.message.toByteArray(),
+                seed = vector.seed.split(",").map { it.toInt().toByte() }.toByteArray())
+
+            assertEquals(BigInteger(vector.signatureRX, 16), signature.r.x)
+            assertEquals(BigInteger(vector.signatureRY, 16), signature.r.y)
+
+            assertEquals(BigInteger(vector.signatureS, 16), signature.s)
+
+            println("Validated!")
         }
     }
 
@@ -84,7 +129,7 @@ class SchnorrSignatureTest {
             var signature = Signature(AltBabyJubjub.zero, BigInteger.ZERO)
 
             signTimeElapsed += measureNanoTime {
-                signature = schnorr.signRawMessage(byteArrayOf(m.toByte()))
+                signature = schnorr.signRawMessage(msgBytes = byteArrayOf(m.toByte()), seed = nextBytes(80))
             }
 
             // measure verify
@@ -108,7 +153,7 @@ class SchnorrSignatureTest {
 
     @Test
     @Tag("benchmark")
-    fun benchmarkSignedMessage() {
+    fun benchmarkHashedMessage() {
         val numRuns = 1000
         val schnorr = SchnorrSignature.zinc
 
@@ -127,7 +172,7 @@ class SchnorrSignatureTest {
             var signature = Signature(AltBabyJubjub.zero, BigInteger.ZERO)
 
             signTimeElapsed += measureNanoTime {
-                signature = schnorr.signHashedMessage(byteArrayOf(m.toByte()))
+                signature = schnorr.signHashedMessage(msgBytes = byteArrayOf(m.toByte()), seed = nextBytes(80))
             }
 
             // measure verify
