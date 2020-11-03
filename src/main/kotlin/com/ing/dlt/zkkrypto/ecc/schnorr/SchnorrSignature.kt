@@ -50,6 +50,11 @@ class SchnorrSignature(
         publicKey = base.scalarMult(privateKey)
     }
 
+    fun setKeys(privKey: BigInteger){
+        privateKey = privKey
+        publicKey = base.scalarMult(privateKey)
+    }
+
     fun nextKeyPair() {
         // Generate private key
         privateKey = BigInteger(curve.S.bitLength(), SecureRandom())
@@ -60,10 +65,10 @@ class SchnorrSignature(
         publicKey = base.scalarMult(privateKey)
     }
 
-    fun signRawMessage(msgBytes: ByteArray): Signature {
+    fun signRawMessage(msgBytes: ByteArray, seed: ByteArray): Signature {
 
         // Generate random r as the hash digest of Blake2b(randomBytes || msg)
-        val r = hashToScalar(HashEnum.BLAKE2B, compPersonalization, first = nextBytes(80), second = msgBytes)
+        val r = hashToScalar(HashEnum.BLAKE2B, compPersonalization, first = seed, second = msgBytes)
 
         // compute first component of the signature
         val rPoint = base.scalarMult(r)
@@ -74,15 +79,15 @@ class SchnorrSignature(
         val uniformMessage = toUniformFieldElement(paddedMessage)
 
         // second component of the signature
-        val s = uniformMessage * privateKey % curve.S + r % curve.S
+        val s = (((uniformMessage * privateKey) % curve.S) + r) % curve.S
 
         return Signature(rPoint, s)
     }
 
-    fun signHashedMessage(msgBytes: ByteArray): Signature {
+    fun signHashedMessage(msgBytes: ByteArray, seed: ByteArray): Signature {
 
         // Generate random r as the hash digest of Blake2b(randomBytes || msg)
-        val r = hashToScalar(HashEnum.BLAKE2B, compPersonalization, first = nextBytes(80), second = msgBytes)
+        val r = hashToScalar(HashEnum.BLAKE2B, compPersonalization, first = seed, second = msgBytes)
 
         // compute first component of the signature
         val rPoint = base.scalarMult(r)
@@ -95,7 +100,7 @@ class SchnorrSignature(
         val messageDigest = hashToScalar(HashEnum.BLAKE2S, msgPersonalization, first = rXCoordBytes, second = paddedMessage)
 
         // second component of the signature
-        val s = messageDigest * privateKey % curve.S + r % curve.S
+        val s = (((messageDigest * privateKey) % curve.S) + r) % curve.S
 
         return Signature(rPoint, s)
     }
@@ -146,7 +151,7 @@ class SchnorrSignature(
             val ubyte = byte.asUnsigned()
             (7 downTo 0).fold(acc) { local, shift ->
                 val bit = ubyte shr shift and 1
-                (local + local) % curve.S + if (bit == 1) { BigInteger.ONE } else { BigInteger.ZERO }
+                ((local + local) % curve.S + if (bit == 1) { BigInteger.ONE } else { BigInteger.ZERO }) % curve.S
             }
         }
 
