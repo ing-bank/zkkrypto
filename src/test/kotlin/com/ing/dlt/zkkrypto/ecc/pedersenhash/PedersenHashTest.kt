@@ -16,7 +16,7 @@ internal class PedersenHashTest {
 
         TestVectors.jubjub.forEach { vector ->
 
-            val hash  = BigInteger(PedersenHash.zcash().hash(vector.input_bits))
+            val hash = BigInteger(PedersenHash.zcash().hash(vector.input_bits))
 
             assertEquals(BigInteger(vector.hash_x, 16), hash)
         }
@@ -27,8 +27,10 @@ internal class PedersenHashTest {
 
         TestVectors.altBabyJubjub.forEach { vector ->
 
-            val hash = BigInteger(PedersenHash(curve = AltBabyJubjub, chunksPerGenerator = 62)
-                .hash(vector.input_bits))
+            val hash = BigInteger(
+                PedersenHash(curve = AltBabyJubjub, chunksPerGenerator = 62)
+                    .hash(vector.input_bits)
+            )
 
             assertEquals(BigInteger(vector.hash_x, 16), hash)
         }
@@ -41,7 +43,7 @@ internal class PedersenHashTest {
 
             val hash = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
 
-            assertEquals(vector.hash_x,  hash.toString(16))
+            assertEquals(vector.hash_x, hash.toString(16))
         }
     }
 
@@ -55,7 +57,7 @@ internal class PedersenHashTest {
             hash_y = "40d2992106b2c6e8c2f0b38e5238fbd9b46ef042d91011a5566044f2943ac65"
         )
 
-        val hash  = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
+        val hash = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
 
         assertEquals(vector.hash_x, hash.toString(16))
     }
@@ -74,7 +76,6 @@ internal class PedersenHashTest {
         assertEquals("116fbd117d117768ec0f977d857df3e278015d4ce9fd4d08bd6c153ebd1fa2", BigInteger(hash).toString(16))
     }
 
-
     @Test
     fun salt() {
 
@@ -90,7 +91,6 @@ internal class PedersenHashTest {
         assertArrayEquals(expected, hash)
     }
 
-
     //    @Test
     fun hashSingle() {
 
@@ -101,9 +101,7 @@ internal class PedersenHashTest {
         println("Message hash is: ${hash.toString(16)}")
 
         assertEquals(BigInteger(vector.hash_x, 16), hash)
-
     }
-
 
 //    @Test
     fun benchmark() {
@@ -133,10 +131,9 @@ internal class PedersenHashTest {
 //        Neither MM nor lookups nor any other optimizations are implemented
 //        so looks like there is plenty of room for improvement yet its good enough at least for experimentation
 
-
         val start = System.nanoTime()
         val numRuns = 1000
-        for(m in 1..numRuns) {
+        for (m in 1..numRuns) {
             PedersenHash(curve = Jubjub).hash(BitArray(m.toBigInteger().toByteArray()))
         }
         val finish = System.nanoTime()

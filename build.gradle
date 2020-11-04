@@ -3,6 +3,7 @@ plugins {
     id "com.jfrog.bintray" version "1.8.5"
     id "maven-publish"
     id 'java-library'
+    id 'com.diffplug.gradle.spotless' version '3.28.1'
 }
 
 group = "com.ing.dlt"
@@ -20,9 +21,16 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags("benchmark")
+    }
 }
 
+task benchmark(type: Test) {
+    useJUnitPlatform {
+        includeTags("benchmark")
+    }
+}
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
@@ -35,6 +43,11 @@ java {
     withJavadocJar()
 }
 
+spotless {
+    kotlin {
+        ktlint("0.37.1")
+    }
+}
 
 // Bintray publishing
 bintray {

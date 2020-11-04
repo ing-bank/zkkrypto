@@ -9,27 +9,27 @@ import kotlin.math.min
 data class PoseidonHash(
     val r: BigInteger = BabyJubjub.R,
     val constants: Constants = defaultRoundConstants()
-): ZKHash {
+) : ZKHash {
 
     /**
      * Hash size in bytes
      */
-    override val hashLength = r.bitLength() / 8 + if(r.bitLength() / 8 != 0) 1 else 0
+    override val hashLength = r.bitLength() / 8 + if (r.bitLength() / 8 != 0) 1 else 0
 
     override fun hash(msg: ByteArray): ByteArray = hash(bytesToField(msg)).toByteArray()
 
-    fun hash(msg: List<BigInteger>): BigInteger  {
+    fun hash(msg: List<BigInteger>): BigInteger {
 
         if (msg.isEmpty() || msg.size >= constants.numRoundsP.size - 1)
             throw Exception("Invalid inputs length: ${msg.size}, maximum allowed: ${constants.numRoundsP.size - 2}")
 
-        msg.forEach { if(it >= r) throw Exception("Element {$it} is out of the field {$r}") }
+        msg.forEach { if (it >= r) throw Exception("Element {$it} is out of the field {$r}") }
 
         val t = msg.size + 1
 
         var state = msg.plus(BigInteger.ZERO).toMutableList()
 
-        val nRoundsP = constants.numRoundsP[t-2]
+        val nRoundsP = constants.numRoundsP[t - 2]
 
         val lastRound = constants.numRoundsF + nRoundsP - 1
 
@@ -37,7 +37,7 @@ data class PoseidonHash(
 
             // Add Round Key
             for (i in state.indices) {
-                state[i] = state[i] + constants.c[t-2][round * t + i]
+                state[i] = state[i] + constants.c[t - 2][round * t + i]
             }
 
             // S-Box
@@ -53,7 +53,7 @@ data class PoseidonHash(
 
             // If not last round: mix (via matrix multiplication)
             if (round != lastRound) {
-                state = mix(state, constants.m[t-2]).toMutableList()
+                state = mix(state, constants.m[t - 2]).toMutableList()
             }
         }
 
@@ -87,7 +87,7 @@ data class PoseidonHash(
         val ints = mutableListOf<BigInteger>()
 
         for (i in msg.indices step n) {
-            val int = BigInteger(1, msg.sliceArray(i until min(i+n, msg.size)))
+            val int = BigInteger(1, msg.sliceArray(i until min(i + n, msg.size)))
             ints.add(int)
         }
         return ints

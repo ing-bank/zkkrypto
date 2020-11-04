@@ -1,7 +1,7 @@
 package com.ing.dlt.zkkrypto.ecc.pedersenhash
 
-import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
 import com.ing.dlt.zkkrypto.ecc.EllipticCurve
+import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
 import com.ing.dlt.zkkrypto.ecc.curves.BabyJubjub
 import com.ing.dlt.zkkrypto.ecc.curves.Jubjub

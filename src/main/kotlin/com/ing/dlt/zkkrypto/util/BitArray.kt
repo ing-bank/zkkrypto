@@ -8,11 +8,11 @@ import java.math.BigInteger
 data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
 
     fun get(i: Int): BigInteger {
-        return if(testBit(i)) BigInteger.ONE else BigInteger.ZERO
+        return if (testBit(i)) BigInteger.ONE else BigInteger.ZERO
     }
 
     fun testBit(i: Int): Boolean {
-        if(i >= size) throw ArrayIndexOutOfBoundsException(i)
+        if (i >= size) throw ArrayIndexOutOfBoundsException(i)
         val byte: Int = i / 8
         val bit: Int = 7 - i % 8
         return data[byte].toInt().ushr(bit).and(1) > 0
@@ -43,7 +43,7 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
     }
 
     fun plus(other: BitArray): BitArray {
-        return if(size % 8 != 0) {
+        return if (size % 8 != 0) {
             val newData = shift(other.data, this.size)
             for (i in this.data.indices) newData[i] = newData[i] or data[i]
             BitArray(newData, this.size + other.size)
@@ -55,11 +55,11 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
     private fun shift(source: ByteArray, bitCount: Int): ByteArray {
         val shiftMod = bitCount % 8
         val offsetBytes = bitCount / 8
-        val dest = ByteArray(source.size + offsetBytes + (if(shiftMod == 0) 0 else 1))
+        val dest = ByteArray(source.size + offsetBytes + (if (shiftMod == 0) 0 else 1))
         val carryMask = (0xFF ushr (8 - shiftMod)).toByte()
 
         for (i in source.indices) {
-            if(shiftMod == 0) {
+            if (shiftMod == 0) {
                 dest[offsetBytes + i] = source[i]
             } else {
                 val sourceCarry = (source[i] and carryMask).asUnsigned() shl (8 - shiftMod)
@@ -72,7 +72,7 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
 
     companion object {
 
-        fun fromString(bitString: String) : BitArray {
+        fun fromString(bitString: String): BitArray {
 
             val byteLen = wordLen(bitString.length)
             val data = ByteArray(byteLen)
@@ -81,12 +81,12 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
             var byteIndex = 0
 
             bitString.forEach { char ->
-                if(char == '1') {
+                if (char == '1') {
                     data[byteIndex] = (data[byteIndex] + 1.shl(bitIndex)).toByte()
-                } else if(char != '0') throw IllegalArgumentException("Only binary strings are allowed")
+                } else if (char != '0') throw IllegalArgumentException("Only binary strings are allowed")
 
                 bitIndex--
-                if(bitIndex < 0) {
+                if (bitIndex < 0) {
                     byteIndex++
                     bitIndex = 7
                 }
@@ -96,7 +96,7 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
         }
 
         fun wordLen(bitLen: Int, wordLen: Int = 8): Int {
-            return bitLen / wordLen + if(bitLen % wordLen == 0) 0 else 1
+            return bitLen / wordLen + if (bitLen % wordLen == 0) 0 else 1
         }
     }
 }

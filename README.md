@@ -9,6 +9,7 @@ Currently, following algorithms are implemented:
 - Poseidon hash
 - Edwards curve arithmetic
 - Curves: Jubjub, BabyJubjub, AltBabyJubjub
+- Schnorr EdDSA signatures with Blake2 hash 
 
 ### Getting started
 

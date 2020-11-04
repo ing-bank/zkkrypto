@@ -6,17 +6,16 @@ import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.math.BigInteger
 import kotlin.math.min
 
-
 data class Mimc7Hash(
     val r: BigInteger = BabyJubjub.R,
     val numRounds: Int = defaultNumRounds,
     val roundConstants: List<BigInteger> = generateRoundConstants(r = r, numRounds = numRounds)
-): ZKHash {
+) : ZKHash {
 
     /**
      * Hash size in bytes
      */
-    override val hashLength = r.bitLength() / 8 + if(r.bitLength() / 8 != 0) 1 else 0
+    override val hashLength = r.bitLength() / 8 + if (r.bitLength() / 8 != 0) 1 else 0
 
     override fun hash(msg: ByteArray): ByteArray = hash(bytesToField(msg))
 
@@ -24,7 +23,7 @@ data class Mimc7Hash(
 
         // check if all elements are in field R
         msg.forEach {
-            if( it > r) throw IllegalArgumentException("Element $it is not in field $r")
+            if (it > r) throw IllegalArgumentException("Element $it is not in field $r")
         }
 
         var result = BigInteger.ZERO
@@ -33,7 +32,7 @@ data class Mimc7Hash(
             result = (result + it + hashElement(it, result)) % r
         }
         val bytes = result.toByteArray()
-        return if(bytes.size == hashLength)
+        return if (bytes.size == hashLength)
             bytes
         else
             ByteArray(hashLength - bytes.size).plus(bytes)
@@ -63,7 +62,7 @@ data class Mimc7Hash(
 
         for (i in msg.indices step n) {
             // We revert array here because bytes are supposed to be little-endian unlike BigInteger
-            val int = BigInteger(1, msg.sliceArray(i until min(i+n, msg.size)).reversedArray())
+            val int = BigInteger(1, msg.sliceArray(i until min(i + n, msg.size)).reversedArray())
             ints.add(int)
         }
         return ints
