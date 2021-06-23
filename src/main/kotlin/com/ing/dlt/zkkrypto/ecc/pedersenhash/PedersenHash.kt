@@ -1,7 +1,6 @@
 package com.ing.dlt.zkkrypto.ecc.pedersenhash
 
 import com.ing.dlt.zkkrypto.ecc.EllipticCurve
-import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
 import com.ing.dlt.zkkrypto.ecc.ZKHash
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
 import com.ing.dlt.zkkrypto.ecc.curves.Jubjub
@@ -18,15 +17,11 @@ data class PedersenHash(
     val window: Int = 3,
     val chunksPerGenerator: Int = 63, // ZCash default, Zinc uses 62 for AltJJ
     val curve: EllipticCurve,
-    val generators: List<EllipticCurvePoint> = GeneratorsGenerator.defaultForCurve(curve),
+    val generators: Generators = Generators.defaultForCurve(curve),
     val defaultSalt: BitArray? = null
 ): ZKHash {
 
     init {
-        generators.forEach {
-            if (!it.isOnCurve()) throw IllegalStateException("Point is not on the curve")
-            if(it.curve != generators.first().curve) throw IllegalStateException("Generators should belong to same curve")
-        }
         if(window != 3) throw IllegalStateException("Only supporting window size 3 at the moment")
     }
 
@@ -46,13 +41,15 @@ data class PedersenHash(
         var hashPoint = curve.zero
         val salted = salted(msg, salt)
 
-        if(salted.size > maxBitLength()) throw IllegalArgumentException("Message is too long, length = ${salted.size}, limit = ${maxBitLength()}")
+        if(salted.size > maxBitLength() && maxBitLength() > 0) throw IllegalArgumentException("Message is too long, length = ${salted.size}, limit = ${maxBitLength()}")
 
         val m = padded(salted)
 
         val numProducts = numProducts(m)
+        val generatorsIter = generators.iterator()
+
         for (i in 0 until numProducts) {
-                hashPoint = hashPoint.add(generators[i].scalarMult(product(m, i)))
+                hashPoint = hashPoint.add(generatorsIter.next().scalarMult(product(m, i)))
         }
 
         // we want constant size hashes so we add trailing zero bytes to the beginning
@@ -123,7 +120,7 @@ data class PedersenHash(
         return generators.size * productBitSize()
     }
 
-    private fun numProducts(m: BitArray) = min(generators.size, m.size / productBitSize() + if(m.size % productBitSize() == 0) 0 else 1)
+    private fun numProducts(m: BitArray) = m.size / productBitSize() + if(m.size % productBitSize() == 0) 0 else 1
 
     private fun salted(msg: BitArray, salt: BitArray?): BitArray {
         return salt?.plus(msg) ?: msg
@@ -134,7 +131,7 @@ data class PedersenHash(
     }
 
     companion object {
-        fun zinc() = PedersenHash(
+        val zinc = PedersenHash(
             curve = AltBabyJubjub,
             chunksPerGenerator = 62,
             defaultSalt = BitArray.fromString("111111")

@@ -39,7 +39,7 @@ internal class PedersenHashTest {
 
         TestVectors.altBabyJubjubBytes.forEach { vector ->
 
-            val hash = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
+            val hash = BigInteger(PedersenHash.zinc.hash(vector.input_bits))
 
             assertEquals(vector.hash_x,  hash.toString(16))
         }
@@ -55,9 +55,29 @@ internal class PedersenHashTest {
             hash_y = "40d2992106b2c6e8c2f0b38e5238fbd9b46ef042d91011a5566044f2943ac65"
         )
 
-        val hash  = BigInteger(PedersenHash.zinc().hash(vector.input_bits))
+        val hash  = BigInteger(PedersenHash.zinc.hash(vector.input_bits))
 
         assertEquals(vector.hash_x, hash.toString(16))
+    }
+
+    @Test
+    fun zincGeneratorsTest() {
+
+        val hardcoded = Generators.zincAltBabyJubjub().iterator()
+
+        val calculated = PedersenHash.zinc.generators.iterator()
+
+        for (i in 0..4) {
+            val h = hardcoded.next()
+            val c = calculated.next()
+            require(h == c) { "Generated generators should be equal to pregenerated generators" }
+        }
+
+        for (i in 0..2) {
+            require(calculated.iterator().hasNext())
+            val next = calculated.iterator().next() // shouldn't fail
+            require(next.isOnCurve())
+        }
     }
 
     @Test
@@ -104,6 +124,56 @@ internal class PedersenHashTest {
 
     }
 
+//    @Test
+    fun benchmarkGenerators() {
+
+//        Total time (nanos): 16.701.578.307 ~ 16 seconds
+//        Total time per generator (nanos): 521.924 ~ 0.5 milliseconds
+//
+//        Will do for now but its clear how to optimize it further
+
+
+        val calculated = PedersenHash.zinc.generators.iterator()
+
+        val start = System.nanoTime()
+        val numRuns = 4 * 8 * 1000 // ~ 1 MB
+        for(i in 0..numRuns) {
+            calculated.next()
+        }
+        val finish = System.nanoTime()
+        println("Total time (nanos): ${finish - start}")
+        println("Average time per generator (nanos): ${(finish - start) / numRuns}")
+    }
+
+//    @Test
+    fun benchmarkLongHash() {
+
+        val ph = PedersenHash.zinc
+
+        // Generate generators
+        val calculated = ph.generators.iterator()
+
+        var start = System.nanoTime()
+        var numRuns = 4 * 8 * 1000 // ~ 1 MB
+        for(i in 0..numRuns) {
+            calculated.next()
+        }
+        var finish = System.nanoTime()
+        println("Total time (nanos): ${finish - start}")
+        println("Average time per generator (nanos): ${(finish - start) / numRuns}")
+
+
+        // Hash
+        val msg = Random.nextBytes(1000000)
+
+        start = System.nanoTime()
+        numRuns = 1
+        for(i in 0..numRuns) {
+            ph.hash(msg)
+        }
+        finish = System.nanoTime()
+        println("Average time per hash (nanos): ${(finish - start) / numRuns}")
+    }
 
 //    @Test
     fun benchmark() {
@@ -141,6 +211,6 @@ internal class PedersenHashTest {
         }
         val finish = System.nanoTime()
         println("Total time (nanos): ${finish - start}")
-        println("Total time per hash (nanos): ${(finish - start) / numRuns}")
+        println("Average time per hash (nanos): ${(finish - start) / numRuns}")
     }
 }

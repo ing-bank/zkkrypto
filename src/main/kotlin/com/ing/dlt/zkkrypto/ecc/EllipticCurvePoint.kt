@@ -8,4 +8,8 @@ data class EllipticCurvePoint(val x: BigInteger, val y: BigInteger, val curve: E
     fun scalarMult(scalar: BigInteger): EllipticCurvePoint = curve.scalarMult(this, scalar)
     fun double(): EllipticCurvePoint = curve.double(this)
     fun isOnCurve(): Boolean = curve.isOnCurve(this)
+
+    override fun toString(): String {
+        return "EllipticCurvePoint(x=${x.toString(16)}, y=${y.toString(16)}"
+    }
 }

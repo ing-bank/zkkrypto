@@ -1,12 +1,14 @@
 package com.ing.dlt.zkkrypto.ecc
 
-import com.ing.dlt.zkkrypto.ecc.arithmetic.Arithmetic
 import java.math.BigInteger
 
-interface EllipticCurve : Arithmetic {
+interface EllipticCurve {
 
     // group order
     val R: BigInteger
+
+    // group generator
+    val FrGenerator: BigInteger
 
     // order of prime subgroup
     val S: BigInteger
@@ -16,4 +18,10 @@ interface EllipticCurve : Arithmetic {
 
     // identity element
     val zero: EllipticCurvePoint
+
+    fun add(a: EllipticCurvePoint, b: EllipticCurvePoint): EllipticCurvePoint
+    fun scalarMult(p: EllipticCurvePoint, scalar: BigInteger): EllipticCurvePoint
+    fun double(p: EllipticCurvePoint): EllipticCurvePoint
+    fun isOnCurve(p: EllipticCurvePoint): Boolean
+    fun getForY(y: BigInteger, sign: Boolean): EllipticCurvePoint?
 }
