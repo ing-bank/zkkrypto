@@ -111,17 +111,15 @@ internal class PedersenHashTest {
     }
 
 
-    //    @Test
+    @Test
     fun hashSingle() {
 
-        val vector = TestVectors.jubjub[0]
-
-        val hash = BigInteger(PedersenHash(curve = Jubjub).hash(vector.input_bits))
-
-        println("Message hash is: ${hash.toString(16)}")
-
-        assertEquals(BigInteger(vector.hash_x, 16), hash)
-
+        val len = 1
+        val ph = PedersenHash.zinc
+        val f42 = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101010"
+        val msg = BitArray.fromString(f42 + f42 + f42)
+        val hash = ph.hash(msg)
+        println(BigInteger(hash).toString(16))
     }
 
 //    @Test
