@@ -12,12 +12,12 @@ Currently, following algorithms are implemented:
 
 ### Getting started
 
-To use zkkrypto as Gradle dependency add Bintray Jcenter to the 'repositories' list.
+To use zkkrypto as Gradle dependency add Jitpack to the 'repositories' list.
 
 ```
 repositories {
     ...
-    jcenter()
+    maven { url 'https://jitpack.io' }
     ...
 }
 ```
