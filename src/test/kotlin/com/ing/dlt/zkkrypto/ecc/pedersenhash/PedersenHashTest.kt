@@ -111,13 +111,13 @@ internal class PedersenHashTest {
     }
 
 
-    @Test
+//    @Test
     fun hashSingle() {
 
         val len = 1
         val ph = PedersenHash.zinc
         val f42 = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101010"
-        val msg = BitArray.fromString(f42 + f42 + f42)
+        val msg = BitArray.fromString(f42 + f42 + f42 + f42 + f42)
         val hash = ph.hash(msg)
         println(BigInteger(hash).toString(16))
     }

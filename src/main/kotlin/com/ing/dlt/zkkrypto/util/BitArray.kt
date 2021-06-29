@@ -44,7 +44,7 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
 
     fun plus(other: BitArray): BitArray {
         return if(size % 8 != 0) {
-            val newData = shift(other.data, this.size)
+            val newData = shift(other, this.size).data
             for (i in this.data.indices) newData[i] = newData[i] or data[i]
             BitArray(newData, this.size + other.size)
         } else {
@@ -52,23 +52,6 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
         }
     }
 
-    private fun shift(source: ByteArray, bitCount: Int): ByteArray {
-        val shiftMod = bitCount % 8
-        val offsetBytes = bitCount / 8
-        val dest = ByteArray(source.size + offsetBytes + (if(shiftMod == 0) 0 else 1))
-        val carryMask = (0xFF ushr (8 - shiftMod)).toByte()
-
-        for (i in source.indices) {
-            if(shiftMod == 0) {
-                dest[offsetBytes + i] = source[i]
-            } else {
-                val sourceCarry = (source[i] and carryMask).asUnsigned() shl (8 - shiftMod)
-                dest[offsetBytes + i] = dest[offsetBytes + i] or (source[i].asUnsigned() ushr shiftMod).toByte()
-                dest[offsetBytes + i + 1] = dest[offsetBytes + i + 1] or sourceCarry.toByte()
-            }
-        }
-        return dest
-    }
 
     companion object {
 
@@ -95,8 +78,34 @@ data class BitArray(val data: ByteArray, val size: Int = data.size * 8) {
             return BitArray(data, bitString.length)
         }
 
-        fun wordLen(bitLen: Int, wordLen: Int = 8): Int {
+        private fun wordLen(bitLen: Int, wordLen: Int = 8): Int {
             return bitLen / wordLen + if(bitLen % wordLen == 0) 0 else 1
         }
+
+        private fun shift(sourceBits: BitArray, bitCount: Int): BitArray {
+            val shiftMod = bitCount % 8
+            val offsetBytes = bitCount / 8
+            val destBitSize = sourceBits.size + bitCount
+            val byteSize = wordLen(destBitSize)
+            val dest = ByteArray(byteSize)
+            val carryMask = (0xFF ushr (8 - shiftMod)).toByte()
+            val byteAdded = wordLen(sourceBits.size) != byteSize
+
+            val source = sourceBits.data
+
+            for (i in source.indices) {
+                if(shiftMod == 0) {
+                    dest[offsetBytes + i] = source[i]
+                } else {
+                    val sourceCarry = (source[i] and carryMask).asUnsigned() shl (8 - shiftMod)
+                    dest[offsetBytes + i] = dest[offsetBytes + i] or (source[i].asUnsigned() ushr shiftMod).toByte()
+                    if(!byteAdded && i == source.size - 1) { /* skip last carry if we don't add byte */ } else {
+                        dest[offsetBytes + i + 1] = dest[offsetBytes + i + 1] or sourceCarry.toByte()
+                    }
+                }
+            }
+            return BitArray(dest, destBitSize)
+        }
+
     }
 }
