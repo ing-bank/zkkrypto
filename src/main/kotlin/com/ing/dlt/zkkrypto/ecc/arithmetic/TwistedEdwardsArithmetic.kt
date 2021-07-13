@@ -100,7 +100,7 @@ object TwistedEdwardsArithmetic {
 
         var x = right.sqrtMod(curve.FrGenerator, curve.R) ?: return null
 
-        if ((x.toByteArray().last() % 2 == 1) != sign) {
+        if ((x.toByteArray().last() % 2 != 0) != sign) {
             x = curve.R - x
         }
         val point = EllipticCurvePoint(x, y, curve)

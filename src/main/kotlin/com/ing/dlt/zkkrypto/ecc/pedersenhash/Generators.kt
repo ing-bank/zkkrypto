@@ -38,10 +38,10 @@ class EndlessGenerators(private val curve: EllipticCurve, private val personaliz
         for (i in 0..255) {
             tag[tag.size - 1] = i.toByte()
             val hash = getGroupHash(tag).reversed().toByteArray()
-            var p: EllipticCurvePoint? = fromY(hash, curve)
+            val p: EllipticCurvePoint? = fromY(hash, curve)
             if(!generators.contains(p)) {
-                p = p?.scalarMult(curve.cofactor)
-                if (p != null) return p
+                val pm = p?.scalarMult(curve.cofactor)
+                if (pm != null) return pm
             } else {
                 // We can as well increase tag and continue but for now we fail to be consistent with Zinc approach
                 error("Duplicate generator at segment $segment, tag $i: $p")

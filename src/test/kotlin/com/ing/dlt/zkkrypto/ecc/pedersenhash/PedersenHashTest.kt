@@ -152,7 +152,7 @@ internal class PedersenHashTest {
         val calculated = ph.generators.iterator()
 
         var start = System.nanoTime()
-        var numRuns = 4 * 8 * 1000 // ~ 1 MB
+        var numRuns = 4 * 8 * 10 // ~ 10 KB
         for(i in 0..numRuns) {
             calculated.next()
         }
@@ -162,7 +162,7 @@ internal class PedersenHashTest {
 
 
         // Hash
-        val msg = Random.nextBytes(1000000)
+        val msg = Random.nextBytes(10000)
 
         start = System.nanoTime()
         numRuns = 1
