@@ -1,13 +1,13 @@
 package com.ing.dlt.zkkrypto.ecc.pedersenhash
 
 import com.ing.dlt.zkkrypto.ecc.EllipticCurve
+import com.ing.dlt.zkkrypto.ecc.EllipticCurvePoint
 import com.ing.dlt.zkkrypto.ecc.ZKHash
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
 import com.ing.dlt.zkkrypto.ecc.curves.Jubjub
 import com.ing.dlt.zkkrypto.util.BitArray
 import java.lang.IllegalStateException
 import java.math.BigInteger
-import kotlin.math.min
 
 /**
  * Instance of Pedersen Hash.
@@ -26,6 +26,9 @@ data class PedersenHash(
     }
 
     private val chunkShift = window + 1
+    private val windowMask = BigInteger.valueOf((1 shl window) - 1L)
+
+    private val generatorsExpTable: ArrayList<ArrayList<ArrayList<EllipticCurvePoint>>> = buildExpTable()
 
     /**
      * Hash size in bytes
@@ -46,10 +49,21 @@ data class PedersenHash(
         val m = padded(salted)
 
         val numProducts = numProducts(m)
-        val generatorsIter = generators.iterator()
 
-        for (i in 0 until numProducts) {
-                hashPoint = hashPoint.add(generatorsIter.next().scalarMult(product(m, i)))
+        for (productIndex in 0 until numProducts) {
+            var product = product(m, productIndex)
+            var tmp = curve.zero
+            var chunkIndex = 0
+            while (product != BigInteger.ZERO) {
+                val powerIndex = product.and(windowMask).intValueExact()
+
+                tmp = tmp.add(generatorsExpTable[productIndex][chunkIndex][powerIndex])
+
+                product = product shr window
+                chunkIndex++
+            }
+
+            hashPoint = hashPoint.add(tmp)
         }
 
         // we want constant size hashes so we add trailing zero bytes to the beginning
@@ -61,17 +75,17 @@ data class PedersenHash(
     }
 
     // compute enc(m_j) as in the documentation
-    private fun chunk(m: BitArray, productIndex: Int, chunkIndex: Int): BigInteger {
+    private fun chunk(m: BitArray, productIndex: Int, chunkIndex: Int): Long {
         val lowestBitIndex = (productIndex * chunksPerGenerator + chunkIndex) * window
 
-        var chunk = BigInteger.ONE
+        var chunk = 1L
         for(i in 0 until window-1) {
-            chunk += m.get(lowestBitIndex + i).shiftLeft(i)
+            if(m.testBit(lowestBitIndex + i)) chunk += 1 shl i
         }
 
         if(m.testBit(lowestBitIndex + (window-1))) {
             // only works for ZCash 3-bits window now because iden3 4-bit algorithm uses different sign switch :shrug:
-            chunk = chunk.negate()
+            chunk = -chunk
         }
 
         return chunk
@@ -91,7 +105,7 @@ data class PedersenHash(
         var product = BigInteger.ZERO
 
         for(j in 0 until numChunksInProduct(msg, i)) {
-            val chunk = fieldNegate(chunk(msg, i, j).shiftLeft(chunkShift * j))
+            val chunk = fieldNegate(BigInteger.valueOf(chunk(msg, i, j)).shiftLeft(chunkShift * j))
             product += chunk
         }
 
@@ -128,6 +142,33 @@ data class PedersenHash(
 
     private fun padded(m: BitArray): BitArray {
         return m.withPadding((window - m.size % window) % window)
+    }
+
+    private fun buildExpTable(): ArrayList<ArrayList<ArrayList<EllipticCurvePoint>>> {
+        if(generators.size <= 0) error("Can only build exp table for limited amount of generators")
+
+        val expTable = ArrayList<ArrayList<ArrayList<EllipticCurvePoint>>>(generators.size)
+        val powers = 1 shl window
+        val generatorsIter = generators.iterator()
+
+        generatorsIter.forEach { generator ->
+            var g = generator
+            val tables = ArrayList<ArrayList<EllipticCurvePoint>>(chunksPerGenerator)
+            for (i in 0..curve.S.bitLength() step window) {
+                var base = curve.zero
+                val table = ArrayList<EllipticCurvePoint>(powers)
+                for (power in 0 until powers) {
+                    table.add(base)
+                    base = base.add(g)
+                }
+                tables.add(table)
+                for (j in 0 until window) {
+                    g = g.double()
+                }
+            }
+            expTable.add(tables)
+        }
+        return expTable
     }
 
     companion object {

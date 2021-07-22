@@ -16,12 +16,14 @@ class FixedSizeGenerators(private val points: List<EllipticCurvePoint>) : Genera
     override fun iterator(): Iterator<EllipticCurvePoint> = points.iterator()
 }
 
-class EndlessGenerators(private val curve: EllipticCurve, private val personalization: ByteArray) : Generators() {
-    override val size = 0
+class EndlessGenerators(private val curve: EllipticCurve, private val personalization: ByteArray, limit: Int = 0) : Generators() {
+    override val size = limit
     private val generators: MutableList<EllipticCurvePoint> = mutableListOf()
 
-    @Synchronized private fun getGenerator(index: Int): EllipticCurvePoint =
-        if(generators.size > index) generators[index] else generateGenerators(index + 1)
+    @Synchronized private fun getGenerator(index: Int): EllipticCurvePoint {
+        if(size != 0 && index >= size) error("Limit of generators amount is reached: $size")
+        return if (generators.size > index) generators[index] else generateGenerators(index + 1)
+    }
 
 
     @Synchronized private fun generateGenerators(newSize: Int): EllipticCurvePoint {
@@ -98,7 +100,7 @@ class EndlessGenerators(private val curve: EllipticCurve, private val personaliz
 
         private var index = 0
 
-        override fun hasNext(): Boolean = true
+        override fun hasNext(): Boolean = if(source.size == 0) true else index < source.size
 
         override fun next(): EllipticCurvePoint = source.getGenerator(index++)
     }
@@ -218,7 +220,7 @@ sealed class Generators {
             )
         )
 
-        fun zincAltBabyJubjubDynamicSize(): Generators = EndlessGenerators(AltBabyJubjub, "Zcash_PH".toByteArray())
+        fun zincAltBabyJubjubDynamicSize(): Generators = EndlessGenerators(AltBabyJubjub, "Zcash_PH".toByteArray(), 4 * 8 * 20) // ~20 Kb, should match custom generators count from our Zinc fork
 
 
         fun defaultForCurve(curve: EllipticCurve): Generators {
