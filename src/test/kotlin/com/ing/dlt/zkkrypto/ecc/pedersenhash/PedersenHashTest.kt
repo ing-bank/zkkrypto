@@ -1,5 +1,6 @@
 package com.ing.dlt.zkkrypto.ecc.pedersenhash
 
+import com.ing.dlt.zkkrypto.ecc.EllipticCurve
 import com.ing.dlt.zkkrypto.ecc.curves.AltBabyJubjub
 import com.ing.dlt.zkkrypto.ecc.curves.Jubjub
 import com.ing.dlt.zkkrypto.util.BitArray
@@ -123,27 +124,49 @@ internal class PedersenHashTest {
     }
 
 //    @Test
-    fun benchmarkGenerators() {
+    fun benchmarkLazyGenerators() {
 
-//        Total time (nanos): 16.701.578.307 ~ 16 seconds
-//        Total time per generator (nanos): 521.924 ~ 0.5 milliseconds
-//
-//        Will do for now but its clear how to optimize it further
-
-
-        val calculated = PedersenHash.zinc.generators.iterator()
+        val bitsPerGenerator = 62 * 3 // Zinc's chunksPerGenerator * window size
+        val calculated = EndlessGenerators(AltBabyJubjub, "Zcash_PH".toByteArray()).iterator()
 
         val start = System.nanoTime()
-        val numRuns = 4 * 8 * 1000 // ~ 1 MB
-        for(i in 0..numRuns) {
+
+        val maxMessageSizeBytes = 10 * 1024 // 10 KB
+        val numGenerators =  (maxMessageSizeBytes * 8)  / bitsPerGenerator + 1
+
+        for(i in 0 until numGenerators) {
             calculated.next()
         }
         val finish = System.nanoTime()
         println("Total time (nanos): ${finish - start}")
-        println("Average time per generator (nanos): ${(finish - start) / numRuns}")
+        println("Average time per generator (nanos): ${(finish - start) / numGenerators}")
     }
 
-//    @Test
+    @Test
+    fun benchmarkExpTable() {
+
+        val bitsPerGenerator = 62 * 3 // Zinc's chunksPerGenerator * window size
+
+        val start = System.nanoTime()
+
+        val maxMessageSizeBytes = 70 * 1024 // 10 KB
+        val numGenerators =  (maxMessageSizeBytes * 8)  / bitsPerGenerator + 1
+
+        val calculated = EndlessGenerators(AltBabyJubjub, "Zcash_PH".toByteArray(), numGenerators)
+
+        val ph = PedersenHash(
+            curve = AltBabyJubjub,
+            chunksPerGenerator = 62,
+            defaultSalt = BitArray.fromString("111111"),
+            generators = calculated
+        )
+        val finish = System.nanoTime()
+        println("Total time (nanos): ${finish - start}")
+        println("Average time per generator (nanos): ${(finish - start) / numGenerators}")
+        println("Average time per 1 KB (nanos): ${(finish - start) / 75}")
+    }
+
+    @Test
     fun benchmarkLongHash() {
 
         val ph = PedersenHash.zinc
@@ -153,7 +176,7 @@ internal class PedersenHashTest {
 
         var start = System.nanoTime()
         var numRuns = 4 * 8 * 10 // ~ 10 KB
-        for(i in 0..numRuns) {
+        for(i in 0 until numRuns) {
             calculated.next()
         }
         var finish = System.nanoTime()
@@ -162,7 +185,12 @@ internal class PedersenHashTest {
 
 
         // Hash
-        val msg = Random.nextBytes(10000)
+//        For 10000 bytes
+//        Total time (nanos): 63351
+//        Average time per generator (nanos): 197
+//        Average time per hash (nanos): 2.346.568.494 = 2.3s
+
+        val msg = Random.nextBytes(1000000)
 
         start = System.nanoTime()
         numRuns = 1

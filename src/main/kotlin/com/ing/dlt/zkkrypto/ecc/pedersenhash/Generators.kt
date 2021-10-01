@@ -220,7 +220,7 @@ sealed class Generators {
             )
         )
 
-        fun zincAltBabyJubjubDynamicSize(): Generators = EndlessGenerators(AltBabyJubjub, "Zcash_PH".toByteArray(), 4 * 8 * 20) // ~20 Kb, should match custom generators count from our Zinc fork
+        fun zincAltBabyJubjubDynamicSize(): Generators = EndlessGenerators(AltBabyJubjub, "Zcash_PH".toByteArray(), 4 * 8 * 10) // ~10 Kb, should match custom generators count from our Zinc fork
 
 
         fun defaultForCurve(curve: EllipticCurve): Generators {
