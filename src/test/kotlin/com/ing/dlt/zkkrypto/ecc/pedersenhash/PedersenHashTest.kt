@@ -143,13 +143,17 @@ internal class PedersenHashTest {
     }
 
     @Test
-    fun benchmarkExpTable() {
+    fun benchmarkLongHash() {
+
+        //        For 10000 bytes
+        val KBs = 80
+        println("$KBs KBs")
 
         val bitsPerGenerator = 62 * 3 // Zinc's chunksPerGenerator * window size
 
-        val start = System.nanoTime()
+        var start = System.nanoTime()
 
-        val maxMessageSizeBytes = 70 * 1024 // 10 KB
+        val maxMessageSizeBytes = KBs * 1024 // 10 KB
         val numGenerators =  (maxMessageSizeBytes * 8)  / bitsPerGenerator + 1
 
         val calculated = EndlessGenerators(AltBabyJubjub, "Zcash_PH".toByteArray(), numGenerators)
@@ -160,45 +164,19 @@ internal class PedersenHashTest {
             defaultSalt = BitArray.fromString("111111"),
             generators = calculated
         )
-        val finish = System.nanoTime()
-        println("Total time (nanos): ${finish - start}")
-        println("Average time per generator (nanos): ${(finish - start) / numGenerators}")
-        println("Average time per 1 KB (nanos): ${(finish - start) / 75}")
-    }
-
-    @Test
-    fun benchmarkLongHash() {
-
-        val ph = PedersenHash.zinc
-
-        // Generate generators
-        val calculated = ph.generators.iterator()
-
-        var start = System.nanoTime()
-        var numRuns = 4 * 8 * 10 // ~ 10 KB
-        for(i in 0 until numRuns) {
-            calculated.next()
-        }
         var finish = System.nanoTime()
-        println("Total time (nanos): ${finish - start}")
-        println("Average time per generator (nanos): ${(finish - start) / numRuns}")
-
+        println("Average time per generator (nanos): ${(finish - start) / numGenerators}")
+        println("Average time per 1 KB (nanos): ${(finish - start) / KBs}")
 
         // Hash
-//        For 10000 bytes
-//        Total time (nanos): 63351
-//        Average time per generator (nanos): 197
-//        Average time per hash (nanos): 2.346.568.494 = 2.3s
-
-        val msg = Random.nextBytes(1000000)
-
         start = System.nanoTime()
-        numRuns = 1
+        val numRuns = 10
         for(i in 0..numRuns) {
-            ph.hash(msg)
+            ph.hash(Random.nextBytes(KBs * 1024))
         }
         finish = System.nanoTime()
         println("Average time per hash (nanos): ${(finish - start) / numRuns}")
+        println("Average time per KB (nanos): ${(finish - start) / (numRuns * KBs)}")
     }
 
 //    @Test
